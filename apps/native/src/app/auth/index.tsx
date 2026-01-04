@@ -24,7 +24,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "@/constants/theme";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "../../components/ui/button";
-import { Icon, Icons } from "../../components/ui/icon";
+import { Icon } from "../../components/ui/icon";
 // Preloads the browser for Android devices to reduce authentication load time
 export const useWarmUpBrowser = () => {
 	useEffect(() => {
@@ -167,7 +167,7 @@ export default function AuthHomeScreen() {
 										icon={
 											<Icon
 												color={theme.colors.textSecondary}
-												icon={Icons.apple}
+												icon={"logo-apple"}
 												size={20}
 											/>
 										}

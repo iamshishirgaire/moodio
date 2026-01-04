@@ -1,17 +1,22 @@
 import { relations } from "drizzle-orm/relations";
+import { userActions } from "./actions";
 import { albums } from "./album";
 import { artists } from "./artist";
+import { user } from "./auth";
+import { fingerprints } from "./fingerprint";
+import { history } from "./play-history";
+import { playlists, playlistTracks } from "./playlist";
 import { tracks } from "./tracks";
 
-// export const fingerprintRelations = relations(fingerprint, ({ one }) => ({
-//   track: one(tracks, {
-//     fields: [fingerprint.songid],
-//     references: [tracks.id],
-//   }),
-// }));
+export const fingerprintRelations = relations(fingerprints, ({ one }) => ({
+	track: one(tracks, {
+		fields: [fingerprints.trackId],
+		references: [tracks.id],
+	}),
+}));
 
-export const tracksRelations = relations(tracks, ({ one }) => ({
-	// fingerprints: many(fingerprint),
+export const tracksRelations = relations(tracks, ({ one, many }) => ({
+	fingerprints: many(fingerprints),
 	album: one(albums, {
 		fields: [tracks.albumId],
 		references: [albums.id],
@@ -44,4 +49,33 @@ export const artistsRelations = relations(artists, ({ many }) => ({
 		relationName: "albums_singlesArtistId_artists_id",
 	}),
 	tracks: many(tracks),
+}));
+
+export const playlistRelations = relations(playlists, ({ one, many }) => ({
+	user: one(user, { fields: [playlists.userId], references: [user.id] }),
+	tracks: many(playlistTracks),
+}));
+
+export const playlistTracksRelations = relations(playlistTracks, ({ one }) => ({
+	playlist: one(playlists, {
+		fields: [playlistTracks.playlistId],
+		references: [playlists.id],
+	}),
+	track: one(tracks, {
+		fields: [playlistTracks.trackId],
+		references: [tracks.id],
+	}),
+}));
+
+export const historyRelations = relations(history, ({ one }) => ({
+	user: one(user, { fields: [history.userId], references: [user.id] }),
+	track: one(tracks, { fields: [history.trackId], references: [tracks.id] }),
+}));
+
+export const userActionsRelations = relations(userActions, ({ one }) => ({
+	user: one(user, { fields: [userActions.userId], references: [user.id] }),
+	track: one(tracks, {
+		fields: [userActions.trackId],
+		references: [tracks.id],
+	}),
 }));

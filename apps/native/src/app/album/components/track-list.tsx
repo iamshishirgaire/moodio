@@ -2,7 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
+import PlayingIndicator from "@/app/player/components/bars-visualizer";
 import { Icon } from "@/components/ui/icon";
+import { IconButton } from "@/components/ui/icon-button";
 import { Text } from "@/components/ui/text";
 import { theme } from "@/constants/theme";
 import { type TPlayerTrack, useMusicPlayer } from "@/store/player/player";
@@ -50,9 +52,6 @@ export default function TrackList({ albumId, albumArtwork }: TrackListProps) {
 	const isTrackPlaying = (trackId: string) =>
 		currentTrack?.id === trackId && playbackState === "playing";
 
-	const isTrackPaused = (trackId: string) =>
-		currentTrack?.id === trackId && playbackState === "paused";
-
 	const isCurrentTrack = (trackId: string) => currentTrack?.id === trackId;
 
 	if (!data || data.length === 0) {
@@ -82,7 +81,6 @@ export default function TrackList({ albumId, albumArtwork }: TrackListProps) {
 			{data.map((d, idx) => {
 				const isCurrent = isCurrentTrack(d.id);
 				const isPlaying = isTrackPlaying(d.id);
-				const isPaused = isTrackPaused(d.id);
 
 				return (
 					<Animated.View entering={FadeInDown.delay(idx * 50)} key={d.id}>
@@ -112,7 +110,6 @@ export default function TrackList({ albumId, albumArtwork }: TrackListProps) {
 												flex: 1,
 												flexDirection: "row",
 												alignItems: "center",
-												justifyContent: "flex-start",
 												gap: 4,
 											}}
 										>
@@ -127,7 +124,7 @@ export default function TrackList({ albumId, albumArtwork }: TrackListProps) {
 													justifyContent: "center",
 												}}
 											>
-												<Icon color={"white"} icon="arrow.down" size={10} />
+												<Icon icon="arrow-down" size={10} />
 											</View>
 											{d.explicit === true ? <Explicit /> : null}
 											<Text
@@ -141,39 +138,25 @@ export default function TrackList({ albumId, albumArtwork }: TrackListProps) {
 											</Text>
 										</View>
 									</View>
-									{isPlaying ? (
-										<View style={styles.playingIndicator}>
-											<View style={[styles.bar, styles.bar1]} />
-											<View style={[styles.bar, styles.bar2]} />
-											<View style={[styles.bar, styles.bar3]} />
-										</View>
-										// biome-ignore lint/style/noNestedTernary: <>
-									) : isPaused ? (
-										<View style={styles.playingIndicator}>
-											<View style={[styles.bar]} />
-											<View style={[styles.bar]} />
-											<View style={[styles.bar]} />
-										</View>
-									) : null}
+
+									<PlayingIndicator isPlaying={isPlaying} />
 								</View>
 							</View>
 
 							{/* More Options */}
-							<TouchableOpacity
-								onPress={(e) => {
-									e.stopPropagation();
-									console.log("More options for track:", d.id);
+							<IconButton
+								onPress={() => {
+									console.log("");
 								}}
-								style={styles.trackMore}
 							>
 								<Icon
 									color={
 										isCurrent ? theme.colors.primary : theme.colors.textTertiary
 									}
-									icon="ellipsis"
+									icon="ellipsis-horizontal"
 									size={18}
 								/>
-							</TouchableOpacity>
+							</IconButton>
 						</TouchableOpacity>
 					</Animated.View>
 				);
@@ -236,20 +219,7 @@ const styles = StyleSheet.create({
 		gap: 2,
 		height: 16,
 	},
-	bar: {
-		width: 3,
-		backgroundColor: theme.colors.primary,
-		borderRadius: 4,
-	},
-	bar1: {
-		height: 8,
-	},
-	bar2: {
-		height: 14,
-	},
-	bar3: {
-		height: 10,
-	},
+
 	trackInfo: {
 		flex: 1,
 		flexDirection: "row",

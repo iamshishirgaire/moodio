@@ -1,11 +1,11 @@
-import { Octicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import type React from "react";
 import type { ComponentProps } from "react";
 
-type OcticonName = ComponentProps<typeof Octicons>["name"];
+type IoniconsName = ComponentProps<typeof Ionicons>["name"];
 
 export type IconProps = {
-	icon: OcticonName;
+	icon: IoniconsName;
 	size?: number;
 	color?: string;
 	strokeWidth?: number;
@@ -15,9 +15,7 @@ export const Icon: React.FC<IconProps> = ({
 	icon,
 	size = 24,
 	color = "white",
-}) => (
-	<Octicons name={icon} size={size} tintColor={color} type="hierarchical" />
-);
+}) => <Ionicons color={color} name={icon} size={size} type="hierarchical" />;
 
 export const Icons = {
 	// User & Authentication

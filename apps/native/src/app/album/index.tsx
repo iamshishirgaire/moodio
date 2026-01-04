@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { IconChevronDown, IconShare2 } from "@tabler/icons-react-native";
 import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
@@ -20,8 +21,11 @@ import Animated, {
 	useAnimatedStyle,
 	useSharedValue,
 } from "react-native-reanimated";
+import { IconButton } from "@/components/ui/icon-button";
 import { theme } from "@/constants/theme";
 import { useAlbumStore } from "@/store/home/album";
+import { handleAppShare } from "@/utils/sharing";
+import MiniPlayer from "../player/components/mini-player";
 import TrackList from "./components/track-list";
 
 const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
@@ -99,14 +103,14 @@ export default function AlbumPage() {
 	return (
 		<View style={styles.container}>
 			<StatusBar barStyle="dark-content" />
-
+			<MiniPlayer />
 			{/* Background Image with Blur */}
 			<ImageBackground
-				blurRadius={80}
+				blurRadius={100}
 				source={{ uri: album.images[0].url }}
 				style={styles.backgroundImage}
 			>
-				<BlurView intensity={95} style={styles.backgroundBlur} tint="light" />
+				<BlurView intensity={85} style={styles.backgroundBlur} tint="light" />
 			</ImageBackground>
 
 			{/* Fixed Header */}
@@ -117,31 +121,15 @@ export default function AlbumPage() {
 					tint="light"
 				>
 					<View style={styles.headerContent}>
-						<TouchableOpacity
-							onPress={() => {
-								router.back();
-							}}
-							style={styles.headerButton}
-						>
-							<Ionicons
-								color={theme.colors.textSecondary}
-								name="chevron-back"
-								size={28}
-							/>
-						</TouchableOpacity>
+						<IconButton onPress={() => router.back()}>
+							<IconChevronDown size={22} />
+						</IconButton>
 						<Animated.Text
 							numberOfLines={1}
 							style={[styles.headerTitle, headerTitleAnimatedStyle]}
 						>
 							{album.name}
 						</Animated.Text>
-						<TouchableOpacity style={styles.headerButton}>
-							<Ionicons
-								color={theme.colors.textSecondary}
-								name="ellipsis-horizontal"
-								size={24}
-							/>
-						</TouchableOpacity>
 					</View>
 				</AnimatedBlurView>
 			</View>
@@ -232,13 +220,13 @@ export default function AlbumPage() {
 							size={26}
 						/>
 					</TouchableOpacity>
-					<TouchableOpacity style={styles.iconButton}>
-						<Ionicons
-							color={theme.colors.textSecondary}
-							name="share-outline"
-							size={26}
-						/>
-					</TouchableOpacity>
+					<IconButton
+						onPress={() => {
+							handleAppShare("album", album.externalUrls.spotify);
+						}}
+					>
+						<IconShare2 size={22} />
+					</IconButton>
 					<TouchableOpacity style={styles.iconButton}>
 						<Ionicons
 							color={theme.colors.textSecondary}

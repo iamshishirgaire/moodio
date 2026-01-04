@@ -13,7 +13,7 @@ import { IconButton } from "@/components/ui/icon-button";
 import { theme } from "@/constants/theme";
 import { useMusicPlayer } from "@/store/player/player";
 
-export const PlaybackControls = () => {
+export default function PlaybackControls() {
 	const {
 		playbackState,
 		isShuffled,
@@ -87,7 +87,7 @@ export const PlaybackControls = () => {
 			</IconButton>
 		</View>
 	);
-};
+}
 
 const styles = StyleSheet.create({
 	container: {

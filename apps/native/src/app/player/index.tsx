@@ -13,6 +13,7 @@ import {
 	TouchableOpacity,
 	View,
 } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Animated, {
 	Extrapolation,
 	interpolate,
@@ -27,7 +28,7 @@ import { theme } from "@/constants/theme";
 import { useAlbumStore } from "@/store/home/album";
 import { useMusicPlayer } from "@/store/player/player";
 import DeviceAndQueueControl from "./components/device-and-queue-control";
-import { PlaybackControls } from "./components/playback-control";
+import PlaybackControls from "./components/playback-control";
 import SeekBar from "./components/seekbar";
 import TrackInfo from "./components/track-info";
 
@@ -42,7 +43,6 @@ export default function PlayerPage() {
 	const scrollY = useSharedValue(0);
 	const router = useRouter();
 
-	// Music player state
 	const {
 		currentTrack,
 		playbackState,
@@ -53,13 +53,11 @@ export default function PlayerPage() {
 		updateLockScreen,
 	} = useMusicPlayer();
 
-	// Initialize player on mount
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <>
 	useEffect(() => {
 		initializePlayer();
 	}, []);
 
-	// Update lock screen controls
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <>
 	useEffect(() => {
 		if (currentTrack) {
@@ -69,6 +67,10 @@ export default function PlayerPage() {
 			updateLockScreen(false);
 		};
 	}, [currentTrack]);
+
+	const openQueue = () => {
+		router.push("/player/queue");
+	};
 
 	const scrollHandler = useAnimatedScrollHandler({
 		onScroll: (event) => {
@@ -133,7 +135,7 @@ export default function PlayerPage() {
 	const releaseYear = album.releaseDate.split("-")[0];
 
 	return (
-		<View style={styles.container}>
+		<GestureHandlerRootView style={styles.container}>
 			<StatusBar barStyle="dark-content" />
 
 			{/* Background Image with Blur */}
@@ -232,7 +234,6 @@ export default function PlayerPage() {
 					</View>
 				)}
 
-				{/* Seek Bar */}
 				<View style={styles.seekBarContainer}>
 					<SeekBar
 						currentTime={position}
@@ -241,18 +242,11 @@ export default function PlayerPage() {
 						onSeek={seekTo}
 					/>
 				</View>
-
-				{/* Playback Controls */}
-				<View style={styles.controlsContainer}>
-					<PlaybackControls />
-				</View>
-				<View style={styles.controlsContainer}>
-					<DeviceAndQueueControl />
-				</View>
-
-				<View style={styles.bottomSpacing} />
+				<PlaybackControls />
+				<DeviceAndQueueControl onOpenQueue={openQueue} />
+				<View style={styles.paddingBottom} />
 			</AnimatedScrollView>
-		</View>
+		</GestureHandlerRootView>
 	);
 }
 
@@ -274,7 +268,6 @@ const styles = StyleSheet.create({
 		width: "100%",
 		height: "100%",
 	},
-
 	center: {
 		flex: 1,
 		justifyContent: "center",
@@ -323,6 +316,7 @@ const styles = StyleSheet.create({
 	},
 	scrollContent: {
 		paddingTop: Platform.OS === "ios" ? 88 : 44,
+		paddingBottom: 100,
 	},
 	coverContainer: {
 		alignItems: "center",
@@ -363,13 +357,7 @@ const styles = StyleSheet.create({
 	seekBarContainer: {
 		marginBottom: theme.spacing.lg,
 	},
-	controlsContainer: {
-		marginBottom: theme.spacing.sm,
-	},
-	volumeContainer: {
-		marginBottom: theme.spacing.xl,
-	},
-	bottomSpacing: {
-		height: 100,
+	paddingBottom: {
+		marginBottom: theme.spacing.lg,
 	},
 });
