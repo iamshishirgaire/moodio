@@ -3,4 +3,5 @@ export const Tags = {
 	TRACK: "Track",
 	HEALTH_CHECK: "Health Check",
 	ARTIST: "Artist",
+	SEARCH: "Search",
 } as const;

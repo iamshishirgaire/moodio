@@ -15,6 +15,13 @@
       "when": 1765956438775,
       "tag": "0001_old_madame_hydra",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1768030944152,
+      "tag": "0002_concerned_wendigo",
+      "breakpoints": true
     }
   ]
 }

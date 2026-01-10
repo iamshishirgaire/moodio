@@ -1,4 +1,5 @@
 import {
+	bigint,
 	foreignKey,
 	index,
 	integer,
@@ -13,7 +14,7 @@ export const fingerprints = pgTable(
 	{
 		id: text("id").primaryKey(),
 		anchorTime: integer("anchor_time").notNull(),
-		address: integer("address").notNull(),
+		address: bigint("address", { mode: "number" }).notNull(),
 		createdAt: timestamp("created_at", { withTimezone: true })
 			.defaultNow()
 			.notNull(),

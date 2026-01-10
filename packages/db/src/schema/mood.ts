@@ -27,7 +27,6 @@ export const userMoodLogs = pgTable(
 			.references(() => user.id, { onDelete: "cascade" }),
 		mood: moodEnum("mood").notNull(),
 		confidenceScore: integer("confidence_score"), // 0-100 (if detected by AI)
-		source: text("source"), // e.g., 'face_api', 'manual_selection', 'activity_sensor'
 		createdAt: timestamp("created_at").defaultNow().notNull(),
 	},
 	(table) => [
