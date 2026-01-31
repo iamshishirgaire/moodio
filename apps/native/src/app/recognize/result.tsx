@@ -24,24 +24,18 @@ export default function ResultModal() {
 	const params = useLocalSearchParams<{
 		title?: string;
 		artist?: string;
-		album?: string;
+		subtitle?: string;
 		artwork?: string;
-		artistImage?: string;
-		confidence?: string;
-		artistUrl?: string;
-		albumUrl?: string;
+		webURL?: string;
+		videoURL?: string;
 	}>();
 
-	const title = params.title ?? "Blinding Lights";
-	const artist = params.artist ?? "The Weeknd";
-	const album = params.album ?? "After Hours";
-	const artworkUrl =
-		params.artwork ??
-		"https://upload.wikimedia.org/wikipedia/en/a/af/The_Weeknd_-_After_Hours.png";
-	const artistImageUrl =
-		params.artistImage ??
-		"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/The_Weeknd_in_2021.jpg/440px-The_Weeknd_in_2021.jpg";
-	const albumUrl = params.albumUrl;
+	const title = params.title ?? "Unknown Title";
+	const artist = params.artist ?? "Unknown Artist";
+	const subtitle = params.subtitle;
+	const artworkUrl = params.artwork;
+	const webURL = params.webURL;
+	const videoURL = params.videoURL;
 
 	// intro animation
 	const ready = useSharedValue(0);
@@ -63,18 +57,26 @@ export default function ResultModal() {
 
 	return (
 		<View style={styles.container}>
-			<ImageBackground
-				resizeMode="cover"
-				source={{ uri: artworkUrl }}
-				style={StyleSheet.absoluteFill}
-			>
-				{/* Keep blur but the overall palette is light; rely on overlay on top elements */}
-				<BlurView
-					intensity={100}
+			{artworkUrl !== undefined && (
+				<ImageBackground
+					resizeMode="cover"
+					source={{ uri: artworkUrl }}
 					style={StyleSheet.absoluteFill}
-					tint="light"
-				/>
-			</ImageBackground>
+				>
+					{/* Dark overlay for better text contrast */}
+					<View
+						style={[
+							StyleSheet.absoluteFill,
+							{ backgroundColor: "rgba(0, 0, 0, 0.4)" },
+						]}
+					/>
+					<BlurView
+						intensity={80}
+						style={StyleSheet.absoluteFill}
+						tint="dark"
+					/>
+				</ImageBackground>
+			)}
 
 			{/* Top Bar */}
 			<View style={styles.topBar}>
@@ -94,7 +96,11 @@ export default function ResultModal() {
 				<View style={styles.rightIcons}>
 					<TouchableOpacity
 						activeOpacity={0.8}
-						onPress={() => router.back()}
+						onPress={() => {
+							if (webURL) {
+								Linking.openURL(webURL);
+							}
+						}}
 						style={styles.iconButton}
 					>
 						<Ionicons
@@ -106,12 +112,16 @@ export default function ResultModal() {
 
 					<TouchableOpacity
 						activeOpacity={0.8}
-						onPress={() => router.back()}
+						onPress={() => {
+							if (videoURL) {
+								Linking.openURL(videoURL);
+							}
+						}}
 						style={styles.iconButton}
 					>
 						<Ionicons
 							color={theme.colors.textPrimary}
-							name="ellipsis-horizontal"
+							name="play-circle"
 							size={20}
 						/>
 					</TouchableOpacity>
@@ -123,9 +133,11 @@ export default function ResultModal() {
 				showsVerticalScrollIndicator={false}
 			>
 				{/* Foreground Artwork */}
-				<Animated.View style={[styles.artworkContainer, introStyle]}>
-					<Image source={{ uri: artworkUrl }} style={styles.artworkImage} />
-				</Animated.View>
+				{artworkUrl !== undefined && (
+					<Animated.View style={[styles.artworkContainer, introStyle]}>
+						<Image source={{ uri: artworkUrl }} style={styles.artworkImage} />
+					</Animated.View>
+				)}
 
 				{/* Info Section */}
 				<View style={styles.infoSection}>
@@ -135,32 +147,53 @@ export default function ResultModal() {
 								{title}
 							</Text>
 						</View>
-						<TouchableOpacity activeOpacity={0.8} style={styles.playButton}>
-							<Ionicons
-								color={theme.colors.surface}
-								name="play"
-								size={28} // icon on primary-colored button
-							/>
+						<TouchableOpacity
+							activeOpacity={0.8}
+							onPress={() =>
+								videoURL !== undefined && Linking.openURL(videoURL)
+							}
+							style={styles.playButton}
+						>
+							<Ionicons color="#FFFFFF" name="play" size={28} />
 						</TouchableOpacity>
 					</View>
 
-					<TouchableOpacity
-						disabled={!albumUrl}
-						onPress={() => albumUrl !== undefined && Linking.openURL(albumUrl)}
-					>
-						<Text style={styles.albumText}>{album}</Text>
-					</TouchableOpacity>
+					{subtitle !== undefined ? (
+						<Text style={styles.albumText}>{subtitle}</Text>
+					) : null}
 
 					{/* Artist Row */}
 					<View style={styles.artistRow}>
-						<Image
-							source={{ uri: artistImageUrl }}
-							style={styles.artistImage}
-						/>
 						<View>
 							<Text style={styles.artistLabel}>Artist</Text>
 							<Text style={styles.artistName}>{artist}</Text>
 						</View>
+					</View>
+
+					{/* Shazam/Apple Music links */}
+					<View style={styles.shazamRow}>
+						{webURL !== undefined && (
+							<TouchableOpacity
+								onPress={() => Linking.openURL(webURL)}
+								style={styles.shazamButton}
+							>
+								<Ionicons color={theme.colors.primary} name="radio" size={18} />
+								<Text style={styles.shazamText}>Shazam</Text>
+							</TouchableOpacity>
+						)}
+						{videoURL !== undefined && (
+							<TouchableOpacity
+								onPress={() => Linking.openURL(videoURL)}
+								style={styles.shazamButton}
+							>
+								<Ionicons
+									color={theme.colors.primary}
+									name="musical-notes"
+									size={18}
+								/>
+								<Text style={styles.shazamText}>Apple Music</Text>
+							</TouchableOpacity>
+						)}
 					</View>
 				</View>
 			</Animated.ScrollView>
@@ -186,7 +219,7 @@ const styles = StyleSheet.create({
 		width: 40,
 		height: 40,
 		borderRadius: theme.borderRadius.round,
-		backgroundColor: theme.colors.overlay,
+		backgroundColor: "rgba(255, 255, 255, 0.25)",
 		alignItems: "center",
 		justifyContent: "center",
 	},
@@ -194,7 +227,7 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		alignItems: "center",
 		gap: 6,
-		backgroundColor: theme.colors.overlay,
+		backgroundColor: "rgba(255, 255, 255, 0.25)",
 		paddingHorizontal: 16,
 		height: 40,
 		borderRadius: theme.borderRadius.round,
@@ -237,25 +270,33 @@ const styles = StyleSheet.create({
 		color: theme.colors.textPrimary,
 		marginBottom: 4,
 	},
-	songArtist: {
-		fontSize: theme.typography.fontSizes.lg,
-		fontWeight: theme.typography.fontWeights.medium,
-		color: theme.colors.textPrimary,
-	},
 	albumText: {
 		fontSize: theme.typography.fontSizes.md,
-		color: theme.colors.textSecondary,
+		color: theme.colors.textPrimary,
 		marginBottom: theme.spacing.md,
+		opacity: 0.9,
 	},
 	shazamRow: {
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 6,
+		gap: 12,
 		marginBottom: theme.spacing.md,
+		flexWrap: "wrap",
 	},
-	shazamCount: {
+	shazamButton: {
+		flexDirection: "row",
+		alignItems: "center",
+		gap: 4,
+		backgroundColor: "rgba(255, 255, 255, 0.95)",
+		borderRadius: theme.borderRadius.lg,
+		paddingHorizontal: 10,
+		paddingVertical: 6,
+		marginRight: 4,
+	},
+	shazamText: {
+		color: theme.colors.primary,
 		fontSize: theme.typography.fontSizes.sm,
-		color: theme.colors.textPrimary,
+		fontWeight: theme.typography.fontWeights.semibold,
 	},
 	artistRow: {
 		flexDirection: "row",
@@ -263,14 +304,10 @@ const styles = StyleSheet.create({
 		gap: 12,
 		marginBottom: theme.spacing.lg,
 	},
-	artistImage: {
-		width: 48,
-		height: 48,
-		borderRadius: theme.borderRadius.round,
-	},
 	artistLabel: {
 		fontSize: theme.typography.fontSizes.xs,
-		color: theme.colors.textTertiary,
+		color: theme.colors.textPrimary,
+		opacity: 0.7,
 	},
 	artistName: {
 		fontSize: theme.typography.fontSizes.md,
@@ -295,12 +332,5 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 		flexShrink: 0,
-	},
-	fullSongButton: {
-		alignItems: "center",
-		justifyContent: "center",
-		backgroundColor: theme.colors.primary,
-		paddingVertical: 14,
-		borderRadius: theme.borderRadius.xl,
 	},
 });

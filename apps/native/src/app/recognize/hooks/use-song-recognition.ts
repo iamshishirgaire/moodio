@@ -261,6 +261,7 @@ export default function useSongRecognition() {
 			const base64 = await readAudioAsBase64(uri);
 			await sendAudioChunk(base64);
 		} catch (e) {
+			console.log(e);
 			console.warn("Failed to stream audio data", e);
 		}
 	}
@@ -280,9 +281,9 @@ export default function useSongRecognition() {
 	}
 
 	async function readNativeAudio(uri: string): Promise<string> {
-		const FileSystem = require("expo-file-system");
+		const FileSystem = require("expo-file-system/legacy");
 		return await FileSystem.readAsStringAsync(uri, {
-			encoding: FileSystem.EncodingType.Base64,
+			encoding: "base64",
 		});
 	}
 
