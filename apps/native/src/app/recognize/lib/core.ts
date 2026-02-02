@@ -28,7 +28,7 @@ export type SongResult = {
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <>
 export default async function sendRecordedFileAsChunk(
 	uri: string,
-	ws: WebSocket | null
+	ws: WebSocket | null,
 ): Promise<number> {
 	let localSentBytes = 0;
 	let file: File | null = null;
@@ -65,7 +65,7 @@ export default async function sendRecordedFileAsChunk(
 							event: "chunk_sent",
 							bytes: localSentBytes,
 							ts: new Date().toISOString(),
-						})
+						}),
 					);
 				} else if (buffer) {
 					// Convert buffer -> base64
@@ -100,7 +100,7 @@ export default async function sendRecordedFileAsChunk(
 							event: "chunk_sent",
 							bytes: localSentBytes,
 							ts: new Date().toISOString(),
-						})
+						}),
 					);
 				} else {
 					console.warn("No buffer available to send; chunk skipped");
@@ -139,7 +139,7 @@ export default async function sendRecordedFileAsChunk(
 								event: "chunk_sent",
 								bytes: localSentBytes,
 								ts: new Date().toISOString(),
-							})
+							}),
 						);
 					}
 				} catch (e2) {
@@ -149,7 +149,7 @@ export default async function sendRecordedFileAsChunk(
 		} else {
 			console.warn(
 				"WS exists but not open, chunk not sent (readyState)",
-				ws?.readyState
+				ws?.readyState,
 			);
 		}
 	} catch (e) {
@@ -170,7 +170,7 @@ export default async function sendRecordedFileAsChunk(
 export function startChunkLoop(
 	recorder: any,
 	intervalMs: number,
-	onChunk: (uri: string) => Promise<void>
+	onChunk: (uri: string) => Promise<void>,
 ): number {
 	const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 	const id = global.setInterval(async () => {

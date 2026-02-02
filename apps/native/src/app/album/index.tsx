@@ -50,7 +50,7 @@ export default function AlbumPage() {
 			scrollY.value,
 			[IMAGE_SIZE - 100, IMAGE_SIZE - 50],
 			[0, 1],
-			Extrapolation.CLAMP
+			Extrapolation.CLAMP,
 		);
 
 		return {
@@ -62,7 +62,7 @@ export default function AlbumPage() {
 			scrollY.value,
 			[0, 100],
 			[0, 80],
-			Extrapolation.CLAMP
+			Extrapolation.CLAMP,
 		);
 
 		return {
@@ -75,14 +75,14 @@ export default function AlbumPage() {
 			scrollY.value,
 			[-100, 0],
 			[1.5, 1],
-			Extrapolation.CLAMP
+			Extrapolation.CLAMP,
 		);
 
 		const translateY = interpolate(
 			scrollY.value,
 			[-100, 0],
 			[-50, 0],
-			Extrapolation.CLAMP
+			Extrapolation.CLAMP,
 		);
 
 		return {

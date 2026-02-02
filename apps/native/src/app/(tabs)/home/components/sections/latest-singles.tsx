@@ -11,7 +11,7 @@ export default function LatestSingles() {
 			input: {
 				albumType: "single",
 			},
-		})
+		}),
 	);
 	const { setCurrent } = useAlbumStore();
 

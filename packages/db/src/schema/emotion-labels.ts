@@ -13,5 +13,5 @@ export const trackEmotions = pgTable(
 			foreignColumns: [tracks.id],
 			name: "song_emotion_id_fkey",
 		}).onDelete("cascade"),
-	]
+	],
 );

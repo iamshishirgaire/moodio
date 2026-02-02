@@ -36,5 +36,5 @@ export const playlistTracks = pgTable(
 		addedAt: timestamp("added_at").defaultNow().notNull(),
 		position: integer().notNull(), // To maintain custom sort order
 	},
-	(table) => [index("playlist_tracks_playlist_id_idx").on(table.playlistId)]
+	(table) => [index("playlist_tracks_playlist_id_idx").on(table.playlistId)],
 );

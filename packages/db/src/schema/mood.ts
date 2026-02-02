@@ -32,5 +32,5 @@ export const userMoodLogs = pgTable(
 	(table) => [
 		index("mood_log_user_id_idx").on(table.userId),
 		index("mood_log_created_at_idx").on(table.createdAt),
-	]
+	],
 );

@@ -41,23 +41,23 @@ export const tracks = pgTable(
 	(table) => [
 		index("tracks_album_id_idx").using(
 			"btree",
-			table.albumId.asc().nullsLast().op("text_ops")
+			table.albumId.asc().nullsLast().op("text_ops"),
 		),
 		index("tracks_created_at_idx").using(
 			"btree",
-			table.createdAt.asc().nullsLast().op("timestamptz_ops")
+			table.createdAt.asc().nullsLast().op("timestamptz_ops"),
 		),
 		index("tracks_popularity_idx").using(
 			"btree",
-			table.popularity.asc().nullsLast().op("int4_ops")
+			table.popularity.asc().nullsLast().op("int4_ops"),
 		),
 		index("tracks_stream_url_idx").using(
 			"btree",
-			table.streamUrl.asc().nullsLast().op("text_ops")
+			table.streamUrl.asc().nullsLast().op("text_ops"),
 		),
 		index("tracks_top_tracks_artist_id_idx").using(
 			"btree",
-			table.topTracksArtistId.asc().nullsLast().op("text_ops")
+			table.topTracksArtistId.asc().nullsLast().op("text_ops"),
 		),
 		foreignKey({
 			columns: [table.albumId],
@@ -73,5 +73,5 @@ export const tracks = pgTable(
 		})
 			.onUpdate("cascade")
 			.onDelete("cascade"),
-	]
+	],
 );

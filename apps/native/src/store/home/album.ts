@@ -25,6 +25,6 @@ export const useAlbumStore = create<AlbumState>()(
 		{
 			name: "album-store",
 			storage: zustandStorage,
-		} as PersistedAlbumState
-	)
+		} as PersistedAlbumState,
+	),
 );

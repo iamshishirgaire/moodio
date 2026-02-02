@@ -9,7 +9,7 @@ export default function LatestAlbums() {
 	const { isLoading, data } = useQuery(
 		orpc.album.getAll.queryOptions({
 			input: {},
-		})
+		}),
 	);
 	const { setCurrent } = useAlbumStore();
 

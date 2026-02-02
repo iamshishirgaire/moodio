@@ -26,7 +26,10 @@ export const searchRepository = {
 					.from(playlists)
 					.where(ilike(playlists.name, `%${query}%`)),
 			]);
-
+		console.log("searchedAlbums:", searchedAlbums);
+		console.log("searchedArtists:", searchedArtists);
+		console.log("searchedTracks:", searchedTracks);
+		console.log("searchedPlaylists:", searchedPlaylists);
 		return {
 			albums: searchedAlbums,
 			artists: searchedArtists,

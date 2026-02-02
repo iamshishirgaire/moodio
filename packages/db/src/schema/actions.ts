@@ -28,5 +28,5 @@ export const userActions = pgTable(
 		index("user_action_user_id_idx").on(table.userId),
 		index("user_action_track_id_idx").on(table.trackId),
 		index("user_action_composite_idx").on(table.userId, table.action),
-	]
+	],
 );

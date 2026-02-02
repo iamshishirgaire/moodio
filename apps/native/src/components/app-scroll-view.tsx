@@ -107,21 +107,21 @@ export default function AppScrollView({
 			pullDistance.value,
 			[0, PULL_TO_REFRESH_THRESHOLD],
 			[-60, 0],
-			Extrapolation.CLAMP
+			Extrapolation.CLAMP,
 		);
 
 		const opacity = interpolate(
 			pullDistance.value,
 			[0, PULL_TO_REFRESH_THRESHOLD / 2, PULL_TO_REFRESH_THRESHOLD],
 			[0, 0.5, 1],
-			Extrapolation.CLAMP
+			Extrapolation.CLAMP,
 		);
 
 		const scale = interpolate(
 			pullDistance.value,
 			[0, PULL_TO_REFRESH_THRESHOLD],
 			[0.5, 1],
-			Extrapolation.CLAMP
+			Extrapolation.CLAMP,
 		);
 
 		return {

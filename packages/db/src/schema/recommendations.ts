@@ -22,5 +22,5 @@ export const userRecommendations = pgTable(
 		reason: text(), // e.g., "Because you like Artist X"
 		createdAt: timestamp("created_at").defaultNow().notNull(),
 	},
-	(table) => [index("recommendations_user_id_idx").on(table.userId)]
+	(table) => [index("recommendations_user_id_idx").on(table.userId)],
 );

@@ -14,5 +14,5 @@ export const history = pgTable(
 			.references(() => tracks.id, { onDelete: "cascade" }),
 		listenCount: integer("listen_count").default(0),
 	},
-	(table) => [index("history_user_id_idx").on(table.userId)]
+	(table) => [index("history_user_id_idx").on(table.userId)],
 );

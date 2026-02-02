@@ -11,7 +11,7 @@ export const handleAppShare = async (type: string, externalUrl: string) => {
 		// 1. Create a deep link that points to your app's share route
 		// This will generate: myapp://share/track/https%3A%2F%2Fspotify.com...
 		const deepLink = createURL(
-			`share/${type}/${encodeURIComponent(externalUrl)}`
+			`share/${type}/${encodeURIComponent(externalUrl)}`,
 		);
 
 		// 2. Open the native share dialog

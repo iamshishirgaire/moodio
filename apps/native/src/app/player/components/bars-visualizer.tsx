@@ -34,8 +34,8 @@ const AnimatedBar: React.FC<AnimatedBarProps> = ({
 						easing: Easing.inOut(Easing.ease),
 					}),
 					-1,
-					true
-				)
+					true,
+				),
 			);
 		} else {
 			cancelAnimation(scaleY);

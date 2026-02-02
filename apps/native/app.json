@@ -1,87 +1,87 @@
 {
-  "expo": {
-    "name": "Moodio",
-    "slug": "moodio-app",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "moodio",
-    "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/images/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#FFFFFF"
-    },
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.iamshishirg.moodiojmp",
-      "entitlements": {
-        "com.apple.developer.applesignin": ["Default"]
-      },
-      "icon": "./assets/images/icon-ios.icon",
-      "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false,
-        "UIBackgroundModes": ["audio"]
-      },
-      "appleTeamId": "F8MZC3QU86"
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
-      "package": "com.iamshishirg.moodio",
-      "permissions": [
-        "android.permission.RECORD_AUDIO",
-        "android.permission.MODIFY_AUDIO_SETTINGS"
-      ]
-    },
-    "web": {
-      "bundler": "metro",
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
-    },
-    "plugins": [
-      [
-        "expo-build-properties",
-        {
-          "ios": {
-            "deploymentTarget": "15.1"
-          }
-        }
-      ],
-      "expo-router",
-      [
-        "expo-audio",
-        {
-          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone."
-        }
-      ],
-      [
-        "expo-splash-screen",
-        {
-          "backgroundColor": "#FFFFFF",
-          "image": "./assets/images/splash-icon.png",
-          "dark": {
-            "image": "./assets/images/splash-icon-dark.png",
-            "backgroundColor": "#FFFFFF"
-          },
-          "imageWidth": 120
-        }
-      ],
-      "expo-web-browser"
-    ],
-    "experiments": {
-      "typedRoutes": true
-    },
-    "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "0602c2c7-0ba5-428a-afd6-62341718b67d"
-      }
-    },
-    "owner": "iamshishirg"
-  }
+	"expo": {
+		"name": "Moodio",
+		"slug": "moodio-app",
+		"version": "1.0.0",
+		"orientation": "portrait",
+		"icon": "./assets/images/icon.png",
+		"scheme": "moodio",
+		"newArchEnabled": true,
+		"splash": {
+			"image": "./assets/images/splash-icon.png",
+			"resizeMode": "contain",
+			"backgroundColor": "#FFFFFF"
+		},
+		"ios": {
+			"supportsTablet": true,
+			"bundleIdentifier": "com.iamshishirg.moodiojmp",
+			"entitlements": {
+				"com.apple.developer.applesignin": ["Default"]
+			},
+			"icon": "./assets/images/icon-ios.icon",
+			"infoPlist": {
+				"ITSAppUsesNonExemptEncryption": false,
+				"UIBackgroundModes": ["audio"]
+			},
+			"appleTeamId": "F8MZC3QU86"
+		},
+		"android": {
+			"adaptiveIcon": {
+				"foregroundImage": "./assets/images/adaptive-icon.png",
+				"backgroundColor": "#ffffff"
+			},
+			"edgeToEdgeEnabled": true,
+			"predictiveBackGestureEnabled": false,
+			"package": "com.iamshishirg.moodio",
+			"permissions": [
+				"android.permission.RECORD_AUDIO",
+				"android.permission.MODIFY_AUDIO_SETTINGS"
+			]
+		},
+		"web": {
+			"bundler": "metro",
+			"output": "static",
+			"favicon": "./assets/images/favicon.png"
+		},
+		"plugins": [
+			[
+				"expo-build-properties",
+				{
+					"ios": {
+						"deploymentTarget": "15.1"
+					}
+				}
+			],
+			"expo-router",
+			[
+				"expo-audio",
+				{
+					"microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone."
+				}
+			],
+			[
+				"expo-splash-screen",
+				{
+					"backgroundColor": "#FFFFFF",
+					"image": "./assets/images/splash-icon.png",
+					"dark": {
+						"image": "./assets/images/splash-icon-dark.png",
+						"backgroundColor": "#FFFFFF"
+					},
+					"imageWidth": 120
+				}
+			],
+			"expo-web-browser"
+		],
+		"experiments": {
+			"typedRoutes": true
+		},
+		"extra": {
+			"router": {},
+			"eas": {
+				"projectId": "0602c2c7-0ba5-428a-afd6-62341718b67d"
+			}
+		},
+		"owner": "iamshishirg"
+	}
 }

@@ -151,7 +151,7 @@ export default function useSongRecognition() {
 				JSON.stringify({
 					event: "connected",
 					ts: new Date().toISOString(),
-				})
+				}),
 			);
 		} catch (e) {
 			console.warn("ws.onopen send failed", e);
@@ -297,7 +297,7 @@ export default function useSongRecognition() {
 				event: "audio_chunk",
 				data: base64,
 				ts: new Date().toISOString(),
-			})
+			}),
 		);
 
 		const estimatedBytes = (base64.length * 3) / 4;
@@ -361,7 +361,7 @@ export default function useSongRecognition() {
 					streamIntervalMs: STREAM_INTERVAL_MS,
 					maxDurationMs: MAX_RECORDING_TIME_MS,
 					ts: new Date().toISOString(),
-				})
+				}),
 			);
 		} catch (e) {
 			console.warn("Failed to send start event", e);
@@ -377,7 +377,7 @@ export default function useSongRecognition() {
 			JSON.stringify({
 				event: "stop",
 				ts: new Date().toISOString(),
-			})
+			}),
 		);
 	}
 

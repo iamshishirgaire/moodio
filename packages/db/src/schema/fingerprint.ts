@@ -29,7 +29,7 @@ export const fingerprints = pgTable(
 	(table) => [
 		index("fingerprint_created_at_idx").using(
 			"btree",
-			table.createdAt.asc().nullsLast().op("timestamptz_ops")
+			table.createdAt.asc().nullsLast().op("timestamptz_ops"),
 		),
 		foreignKey({
 			columns: [table.trackId],
@@ -38,5 +38,5 @@ export const fingerprints = pgTable(
 		})
 			.onUpdate("cascade")
 			.onDelete("cascade"),
-	]
+	],
 );

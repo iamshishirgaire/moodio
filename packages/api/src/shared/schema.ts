@@ -21,7 +21,7 @@ export type PaginationMeta = {
 };
 
 export const createPaginatedResponseSchema = <T extends z.ZodTypeAny>(
-	itemSchema: T
+	itemSchema: T,
 ) =>
 	z.object({
 		data: z.array(itemSchema),
@@ -33,7 +33,7 @@ export const createPaginatedResponseSchema = <T extends z.ZodTypeAny>(
 
 export function createPaginatedResponse<T extends { id: string }>(
 	data: T[],
-	limit = 20
+	limit = 20,
 ): { data: T[]; pagination: PaginationMeta } {
 	const nextCursor = data.length === limit ? data.at(-1)?.id || null : null;
 
@@ -52,7 +52,7 @@ export const createResponseSchema = <T extends z.ZodTypeAny>(itemSchema: T) =>
 	});
 
 export function createResponse<T extends { id: string }>(
-	data: T[] | T
+	data: T[] | T,
 ): { data: T[] | T } {
 	return {
 		data,

@@ -48,7 +48,7 @@ export default function RecordScreen() {
 			pulseAnim.value = withRepeat(
 				withTiming(1, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
 				-1,
-				true
+				true,
 			);
 		} else {
 			isRecordingShared.value = withSpring(0);

@@ -31,25 +31,25 @@ export const artists = pgTable(
 	(table) => [
 		index("artists_created_at_idx").using(
 			"btree",
-			table.createdAt.asc().nullsLast().op("timestamptz_ops")
+			table.createdAt.asc().nullsLast().op("timestamptz_ops"),
 		),
 		index("artists_fetched_at_idx").using(
 			"btree",
-			table.fetchedAt.asc().nullsLast().op("timestamptz_ops")
+			table.fetchedAt.asc().nullsLast().op("timestamptz_ops"),
 		),
 		index("artists_followers_idx").using(
 			"btree",
-			table.followers.asc().nullsLast().op("int4_ops")
+			table.followers.asc().nullsLast().op("int4_ops"),
 		),
 		index("artists_name_idx").using(
 			"btree",
-			table.name.asc().nullsLast().op("text_ops")
+			table.name.asc().nullsLast().op("text_ops"),
 		),
 
 		index("artists_popularity_idx").using(
 			"btree",
-			table.popularity.asc().nullsLast().op("int4_ops")
+			table.popularity.asc().nullsLast().op("int4_ops"),
 		),
 		// Fixed: Remove the GIN index from here - we'll create it separately
-	]
+	],
 );

@@ -22,7 +22,7 @@ export default function TrackList({ albumId, albumArtwork }: TrackListProps) {
 			input: {
 				albumId,
 			},
-		})
+		}),
 	);
 
 	const { setQueue, currentTrack, playbackState, initializePlayer, queue } =
@@ -59,7 +59,7 @@ export default function TrackList({ albumId, albumArtwork }: TrackListProps) {
 	}
 
 	const hasCurrentAlbumInQueue = queue.some(
-		(track) => track.albumId === albumId
+		(track) => track.albumId === albumId,
 	);
 
 	return (

@@ -131,7 +131,7 @@ export default function OnboardingScreen() {
 
 	const toggleGenre = (genre: string) => {
 		setSelectedGenres((prev) =>
-			prev.includes(genre) ? prev.filter((g) => g !== genre) : [...prev, genre]
+			prev.includes(genre) ? prev.filter((g) => g !== genre) : [...prev, genre],
 		);
 	};
 

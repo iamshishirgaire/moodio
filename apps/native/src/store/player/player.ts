@@ -254,7 +254,7 @@ export const useMusicPlayer = create<MusicPlayerState>()(
 					try {
 						const clampedPosition = Math.max(
 							0,
-							Math.min(position / 1000, duration / 1000)
+							Math.min(position / 1000, duration / 1000),
 						); // Convert to seconds
 						player.seekTo(clampedPosition);
 						set({ position: clampedPosition * 1000 }); // Store in milliseconds
@@ -544,7 +544,7 @@ export const useMusicPlayer = create<MusicPlayerState>()(
 						// Disable shuffle - restore original order
 						const currentTrack = state.queue[state.queueIndex];
 						const originalIndex = state.originalQueue.findIndex(
-							(t) => t.id === currentTrack?.id
+							(t) => t.id === currentTrack?.id,
 						);
 
 						return {
@@ -670,7 +670,7 @@ export const useMusicPlayer = create<MusicPlayerState>()(
 					queueIndex: state.queueIndex,
 					currentTrack: state.currentTrack,
 				}),
-			}
-		)
-	)
+			},
+		),
+	),
 );

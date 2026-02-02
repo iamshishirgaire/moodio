@@ -50,8 +50,8 @@ export const findAll = async (request: TGetAlbumRequest) => {
 			artists,
 			eq(
 				artists.id,
-				albumType === "album" ? albums.artistId : albums.singlesArtistId
-			)
+				albumType === "album" ? albums.artistId : albums.singlesArtistId,
+			),
 		)
 		.where(whereClause)
 		.limit(limit)

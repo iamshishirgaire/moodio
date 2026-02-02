@@ -70,7 +70,7 @@ new Elysia()
 			methods: ["GET", "POST", "OPTIONS"],
 			allowedHeaders: ["Content-Type", "Authorization"],
 			credentials: true,
-		})
+		}),
 	)
 	.all("/api/auth/*", (context) => {
 		const { request, status } = context;
@@ -98,9 +98,9 @@ new Elysia()
 	.listen(env.PORT, (server) => {
 		const duration = performance.now() - startTime;
 		console.log(
-			`🦊 ${pc.green(`${pc.bold("Elysia")} v${ELYSIA_VERSION}`)} ${pc.gray("started in")} ${pc.bold(duration.toFixed(2))} ms\n`
+			`🦊 ${pc.green(`${pc.bold("Elysia")} v${ELYSIA_VERSION}`)} ${pc.gray("started in")} ${pc.bold(duration.toFixed(2))} ms\n`,
 		);
 		console.log(
-			`${pc.green(" ➜ ")} ${pc.bold("Server")}:   ${pc.cyan(String(server.url))}`
+			`${pc.green(" ➜ ")} ${pc.bold("Server")}:   ${pc.cyan(String(server.url))}`,
 		);
 	});

@@ -29,5 +29,5 @@ export const trackFeatures = pgTable(
 			foreignColumns: [tracks.id],
 			name: "song_features_song_id_fkey",
 		}).onDelete("cascade"),
-	]
+	],
 );

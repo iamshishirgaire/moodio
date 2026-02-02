@@ -65,7 +65,7 @@ export default function QueuePage() {
 				</ScaleDecorator>
 			);
 		},
-		[queueIndex, skipTo]
+		[queueIndex, skipTo],
 	);
 
 	return (
