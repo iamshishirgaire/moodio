@@ -46,7 +46,7 @@ export default function PlaybackControls() {
 			{isPlaying ? (
 				<IconButton
 					btnstyle={{
-						backgroundColor: theme.colors.primary,
+						backgroundColor: theme.colors.surfaceSecondary,
 						height: 60,
 						width: 60,
 						borderRadius: 30,
@@ -65,7 +65,7 @@ export default function PlaybackControls() {
 					}}
 					onPress={togglePlayPause}
 				>
-					<IconPlayerPlayFilled color={theme.colors.textPrimary} size={32} />
+					<IconPlayerPlayFilled color={theme.colors.surfaceSecondary} size={32} />
 				</IconButton>
 			)}
 

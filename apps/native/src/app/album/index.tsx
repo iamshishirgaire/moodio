@@ -190,7 +190,7 @@ export default function AlbumPage() {
 				{/* Action Buttons */}
 				<View style={styles.actionsContainer}>
 					<TouchableOpacity style={styles.playButton}>
-						<Ionicons color={theme.colors.textPrimary} name="play" size={24} />
+						<Ionicons color={theme.colors.surfaceTertiary} name="play" size={24} />
 						<Text style={styles.playButtonText}>Play</Text>
 					</TouchableOpacity>
 
@@ -360,7 +360,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 		flexDirection: "row",
 		alignItems: "center",
-		justifyContent: "center",
+    justifyContent: "center",
 		backgroundColor: theme.colors.primary,
 		borderRadius: theme.borderRadius.round,
 		paddingVertical: theme.spacing.md,
@@ -368,7 +368,7 @@ const styles = StyleSheet.create({
 		...theme.shadows.small,
 	},
 	playButtonText: {
-		color: theme.colors.textPrimary,
+		color: theme.colors.surfaceTertiary,
 		fontSize: theme.typography.fontSizes.md,
 		fontWeight: theme.typography.fontWeights.semibold,
 	},

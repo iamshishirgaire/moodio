@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Image,
   ImageBackground,
@@ -18,24 +18,40 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { theme } from "../../constants/theme";
+import { TPlayerTrack, useMusicPlayer } from "@/store/player/player";
 
 export default function ResultModal() {
   const router = useRouter();
   const params = useLocalSearchParams<{
-    title?: string;
-    artist?: string;
-    subtitle?: string;
-    artwork?: string;
+    trackData?: string;
+    shazamTitle?: string;
+    shazamArtist?: string;
+    shazamArtwork?: string;
     webURL?: string;
-    videoURL?: string;
+    appleMusicURL?: string;
   }>();
 
-  const title = params.title ?? "Unknown Title";
-  const artist = params.artist ?? "Unknown Artist";
-  const subtitle = params.subtitle;
-  const artworkUrl = params.artwork;
+  const [track, setTrack] = useState<TPlayerTrack | null>(null);
+  const { setTrack: playTrack, currentTrack, playbackState, togglePlayPause } = useMusicPlayer();
+
+  // Parse track data
+  useEffect(() => {
+    if (params.trackData) {
+      try {
+        const parsedTrack = JSON.parse(params.trackData) as TPlayerTrack;
+        setTrack(parsedTrack);
+      } catch (error) {
+        console.error("Failed to parse track data:", error);
+      }
+    }
+  }, [params.trackData]);
+
+  const title = track?.name || params.shazamTitle || "Unknown Title";
+  const artist = track?.artists?.map((a) => a.name).join(", ") || params.shazamArtist || "Unknown Artist";
+  const artworkUrl = track?.albumArtwork?.[0]?.url || params.shazamArtwork;
   const webURL = params.webURL;
-  const videoURL = params.videoURL;
+  const isCurrentTrack = currentTrack?.id === track?.id;
+  const isPlaying = isCurrentTrack && playbackState === "playing";
 
   // intro animation
   const ready = useSharedValue(0);
@@ -46,7 +62,6 @@ export default function ResultModal() {
     });
   }, [ready]);
 
-  // Success sound moved to system notification on result
   const introStyle = useAnimatedStyle(() => ({
     opacity: ready.value,
     transform: [
@@ -54,6 +69,20 @@ export default function ResultModal() {
       { scale: 0.96 + ready.value * 0.04 },
     ],
   }));
+
+  const handlePlayPress = async () => {
+    if (!track) {
+      return;
+    }
+
+    if (isCurrentTrack) {
+      // Toggle play/pause if this is the current track
+      togglePlayPause();
+    } else {
+      // Play the new track
+      await playTrack(track, true);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -85,7 +114,7 @@ export default function ResultModal() {
           onPress={() => router.back()}
           style={styles.iconButton}
         >
-          <Ionicons color={theme.colors.textPrimary} name="close" size={22} />
+          <Ionicons color={theme.colors.surface} name="close" size={22} />
         </TouchableOpacity>
 
         <View style={styles.rightIcons}>
@@ -97,7 +126,7 @@ export default function ResultModal() {
             style={styles.iconButton}
           >
             <Ionicons
-              color={theme.colors.textPrimary}
+              color={theme.colors.surface}
               name="share-outline"
               size={20}
             />
@@ -126,14 +155,21 @@ export default function ResultModal() {
             </View>
             <TouchableOpacity
               activeOpacity={0.8}
-              style={styles.playButton}
-              onPress={() => videoURL && Linking.openURL(videoURL)}
+              style={[
+                styles.playButton,
+                isPlaying && styles.playButtonActive,
+              ]}
+              onPress={handlePlayPress}
             >
-              <Ionicons color="#FFFFFF" name="play" size={28} />
+              <Ionicons
+                color="#FFFFFF"
+                name={isPlaying ? "pause" : "play"}
+                size={28}
+              />
             </TouchableOpacity>
           </View>
 
-          {subtitle && <Text style={styles.albumText}>{subtitle}</Text>}
+
 
           {/* Artist Row */}
           <View style={styles.artistRow}>
@@ -143,7 +179,22 @@ export default function ResultModal() {
             </View>
           </View>
 
-          {/* Shazam/Apple Music links */}
+          {/* Track Info */}
+          {track && (
+            <View style={styles.trackInfoSection}>
+              {track.explicit && (
+                <View style={styles.explicitBadge}>
+                  <Text style={styles.explicitText}>E</Text>
+                </View>
+              )}
+              {track.durationMs && (
+                <Text style={styles.trackDuration}>
+                  {Math.floor(track.durationMs / 60000)}:
+                  {String(Math.floor((track.durationMs % 60000) / 1000)).padStart(2, "0")}
+                </Text>
+              )}
+            </View>
+          )}
         </View>
       </Animated.ScrollView>
     </View>
@@ -172,13 +223,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-
   rightIcons: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
   },
-
   artworkContainer: {
     marginTop: theme.spacing.xl,
     marginBottom: theme.spacing.lg,
@@ -190,11 +239,9 @@ const styles = StyleSheet.create({
     height: 250,
     borderRadius: theme.borderRadius.xl,
   },
-
   scrollContainer: {
     paddingBottom: theme.spacing.xl,
   },
-
   infoSection: {
     paddingHorizontal: theme.spacing.lg,
     paddingBottom: theme.spacing.xl,
@@ -203,37 +250,11 @@ const styles = StyleSheet.create({
   songTitle: {
     fontSize: theme.typography.fontSizes.xxxl,
     fontWeight: theme.typography.fontWeights.bold,
-    color: theme.colors.textPrimary,
+    color: theme.colors.surface,
     marginBottom: 4,
   },
-  albumText: {
-    fontSize: theme.typography.fontSizes.md,
-    color: theme.colors.textPrimary,
-    marginBottom: theme.spacing.md,
-    opacity: 0.9,
-  },
-  shazamRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    marginBottom: theme.spacing.md,
-    flexWrap: "wrap",
-  },
-  shazamButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
-    borderRadius: theme.borderRadius.lg,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    marginRight: 4,
-  },
-  shazamText: {
-    color: theme.colors.primary,
-    fontSize: theme.typography.fontSizes.sm,
-    fontWeight: theme.typography.fontWeights.semibold,
-  },
+
+
   artistRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -242,12 +263,12 @@ const styles = StyleSheet.create({
   },
   artistLabel: {
     fontSize: theme.typography.fontSizes.xs,
-    color: theme.colors.textPrimary,
+    color: theme.colors.surface,
     opacity: 0.7,
   },
   artistName: {
     fontSize: theme.typography.fontSizes.md,
-    color: theme.colors.textPrimary,
+    color: theme.colors.surface,
     fontWeight: theme.typography.fontWeights.semibold,
   },
   titleRow: {
@@ -255,6 +276,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-start",
     gap: theme.spacing.md,
+    marginBottom: theme.spacing.md,
   },
   titleText: {
     flex: 1,
@@ -269,4 +291,36 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flexShrink: 0,
   },
+  playButtonActive: {
+    backgroundColor: theme.colors.primaryDark,
+  },
+  trackInfoSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: theme.spacing.lg,
+  },
+  explicitBadge: {
+    backgroundColor: theme.colors.primary,
+    width: 20,
+    height: 20,
+    borderRadius: 2,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  explicitText: {
+    color: theme.colors.surface,
+    fontSize: 10,
+    fontWeight: "bold",
+  },
+  trackDuration: {
+    fontSize: theme.typography.fontSizes.sm,
+    color: theme.colors.surface,
+    opacity: 0.8,
+  },
+  linksSection: {
+    gap: theme.spacing.sm,
+    marginTop: theme.spacing.md,
+  },
+
 });

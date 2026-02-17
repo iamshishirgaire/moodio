@@ -15,7 +15,7 @@ export const colors = {
 	surfaceTertiary: "#E0E0E0",
 
 	// Text colors
-	textPrimary: "#FFFFFF",
+	textPrimary: "#000000",
 	textSecondary: "#333333",
 	textTertiary: "#777777",
 

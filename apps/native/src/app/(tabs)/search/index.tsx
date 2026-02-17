@@ -10,7 +10,6 @@ export default function SearchScreen() {
   const { query } = useLocalSearchParams<{ query?: string }>();
   const [localQuery, setLocalQuery] = useState(query || "");
 
-  // Update local query when search params change
   React.useEffect(() => {
     if (query !== localQuery) {
       setLocalQuery(query || "");
@@ -18,10 +17,12 @@ export default function SearchScreen() {
   }, [query, localQuery]);
 
   const { data, isLoading, error } = useQuery(
-    orpc.search.queryOptions({
+    orpc.search.searchAll.queryOptions({
       input: { query: localQuery },
     }),
+
   );
+  console.log("search data",data)
 
   return (
     <View style={styles.container}>

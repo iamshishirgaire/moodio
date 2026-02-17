@@ -40,7 +40,6 @@ export default function MiniPlayer() {
 	const opacity = useSharedValue(0);
 	const scale = useSharedValue(0.95);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <>
 	useEffect(() => {
 		if (currentTrack) {
 			translateY.value = withTiming(0);

@@ -15,15 +15,15 @@ export default function TabLayout() {
         />
       </NativeTabs.Trigger>
 
-      <NativeTabs.Trigger name="radio">
+      <NativeTabs.Trigger name="explore/index">
         <Icon
           drawable="custom_settings_drawable"
           sf={{
-            default: "dot.radiowaves.left.and.right",
-            selected: "dot.radiowaves.left.and.right",
+            default: "safari",
+            selected: "safari",
           }}
         />
-        <Label>Radio</Label>
+        <Label>Explore</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="library/index">
         <Icon

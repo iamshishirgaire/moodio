@@ -12,4 +12,8 @@ export const searchResultSchema = z.object({
 	playlists: z.array(createSelectSchema(playlists)),
 });
 
+export const searchTrackResultSchema = z.object({
+	tracks: z.array(createSelectSchema(tracks)),
+});
+export type SearchTrackResult =  z.infer<typeof searchTrackResultSchema>
 export type SearchResult = z.infer<typeof searchResultSchema>;

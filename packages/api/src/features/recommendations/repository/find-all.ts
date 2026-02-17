@@ -1,7 +1,6 @@
 import { db } from "@moodio/db";
 import { tracks } from "@moodio/db/schema/tracks";
 import { userRecommendations } from "@moodio/db/schema/recommendations";
-
 import { eq, desc } from "drizzle-orm";
 import { albums } from "@moodio/db/schema/album";
 
@@ -17,6 +16,7 @@ export const findAllPaginated = async (
 
   const recommendations = await db
     .select({
+      // All track fields required by TPlayerTrack
       id: tracks.id,
       name: tracks.name,
       trackNumber: tracks.trackNumber,
@@ -27,13 +27,15 @@ export const findAllPaginated = async (
       externalUrls: tracks.externalUrls,
       artists: tracks.artists,
       streamUrl: tracks.streamUrl,
+      createdAt: tracks.createdAt,
+      updatedAt: tracks.updatedAt,
+      albumId: tracks.albumId,
+      topTracksArtistId: tracks.topTracksArtistId,
 
-      // Album data for displaying cover art
-      album: {
-        images: albums.images,
-      },
+      // Album artwork (required by TPlayerTrack as albumArtwork)
+      albumArtwork: albums.images,
 
-      // Recommendation info
+      // Recommendation metadata
       recommendationScore: userRecommendations.score,
       recommendationReason: userRecommendations.reason,
     })
