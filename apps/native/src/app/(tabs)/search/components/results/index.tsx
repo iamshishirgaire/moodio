@@ -1,14 +1,12 @@
 import type { SearchResult } from "@moodio/api/features/search/schema";
 import { useRouter } from "expo-router";
-import type React from "react";
 import { Image, Pressable, SectionList, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text } from "@/components/ui/text";
 import { theme } from "@/constants/theme";
+import { useAlbumStore } from "@/store/home/album";
+import { useMusicPlayer, type TPlayerTrack } from "@/store/player/player";
 
-type SearchResultsProps = {
-	results: SearchResult;
-};
 
 type AlbumItem = SearchResult["albums"][number];
 type ArtistItem = SearchResult["artists"][number];
@@ -17,20 +15,27 @@ type PlaylistItem = SearchResult["playlists"][number];
 
 export type SearchItem = AlbumItem | ArtistItem | TrackItem | PlaylistItem;
 
-interface SectionData {
-	title: string;
-	data: SearchItem[];
-	type: "album" | "artist" | "track" | "playlist";
-}
-
-export const SearchResults: React.FC<SearchResultsProps> = ({ results }) => {
+export default function SearchResultsPage({ results }:{results:SearchResult}) {
 	const router = useRouter();
+	const { setQueue } = useMusicPlayer();
+	const setAlbum = useAlbumStore((s) => s.setCurrent);
 
-	const handleItemPress = (item: SearchItem) => {
-		router.push({
-			pathname: "/(tabs)/search/details",
-			params: { item: JSON.stringify(item) },
-		});
+  const handleItemPress = (
+		item: SearchItem,
+		type: "album" | "artist" | "track" | "playlist",
+	) => {
+		if (type === "track") {
+			setQueue([item as TPlayerTrack], 0);
+		} else if (type === "album") {
+			const album = item as AlbumItem;
+			setAlbum(album);
+			router.push("/album");
+		} else if (type === "artist") {
+			const artist = item as ArtistItem;
+			router.push(`/profile/artist/${artist.id}`);
+		} else if (type === "playlist") {
+			// Not in scope
+		}
 	};
 
 	// Organize data into sections
@@ -62,7 +67,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({ results }) => {
 
 		return (
 			<Pressable
-				onPress={() => handleItemPress(item)}
+				onPress={() => handleItemPress(item, "album")}
 				style={({ pressed }) => [
 					styles.itemContainer,
 					pressed && styles.itemPressed,
@@ -98,7 +103,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({ results }) => {
 
 		return (
 			<Pressable
-				onPress={() => handleItemPress(item)}
+				onPress={() => handleItemPress(item, "artist")}
 				style={({ pressed }) => [
 					styles.itemContainer,
 					pressed && styles.itemPressed,
@@ -133,11 +138,11 @@ export const SearchResults: React.FC<SearchResultsProps> = ({ results }) => {
 	};
 
 	const renderTrackItem = (item: TrackItem) => {
-		const imageUrl = undefined;
+		const imageUrl = (item as any).albumArtwork?.[0]?.url;
 
 		return (
 			<Pressable
-				onPress={() => handleItemPress(item)}
+				onPress={() => handleItemPress(item, "track")}
 				style={({ pressed }) => [
 					styles.itemContainer,
 					pressed && styles.itemPressed,
@@ -174,7 +179,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({ results }) => {
 
 		return (
 			<Pressable
-				onPress={() => handleItemPress(item)}
+				onPress={() => handleItemPress(item, "playlist")}
 				style={({ pressed }) => [
 					styles.itemContainer,
 					pressed && styles.itemPressed,

@@ -233,9 +233,7 @@ export default function ExploreScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Recommended for You</Text>
-            <Pressable onPress={() => console.log("See all recommendations")}>
-              <Text style={styles.seeAllButton}>See all</Text>
-            </Pressable>
+
           </View>
 
           {isLoading ? (

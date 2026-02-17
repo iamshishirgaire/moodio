@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { theme } from "@/constants/theme";
 import { orpc } from "@/utils/orpc";
-import { SearchResults } from "./components/results";
+import SearchResults from "./components/results";
 
 export default function SearchScreen() {
   const { query } = useLocalSearchParams<{ query?: string }>();
@@ -16,13 +16,12 @@ export default function SearchScreen() {
     }
   }, [query, localQuery]);
 
-  const { data, isLoading, error } = useQuery(
-    orpc.search.searchAll.queryOptions({
+  const { data, isLoading, error } = useQuery({
+    ...orpc.search.searchAll.queryOptions({
       input: { query: localQuery },
     }),
-
-  );
-  console.log("search data",data)
+    enabled: !!localQuery,
+  });
 
   return (
     <View style={styles.container}>

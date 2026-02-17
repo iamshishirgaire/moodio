@@ -10,8 +10,26 @@ export const searchRepository = {
     const [searchedAlbums, searchedArtists, searchedTracks, searchedPlaylists] =
       await Promise.all([
         db
-          .select()
+          .select({
+            id: albums.id,
+			name: albums.name,
+			albumType: albums.albumType,
+			releaseDate: albums.releaseDate,
+			totalTracks: albums.totalTracks,
+			images: albums.images,
+			externalUrls: albums.externalUrls,
+			genres: albums.genres,
+			popularity: albums.popularity,
+			copyrights: albums.copyrights,
+			createdAt: albums.createdAt,
+			updatedAt: albums.updatedAt,
+			artistId: albums.artistId,
+			singlesArtistId: albums.singlesArtistId,
+			artistName: artists.name,
+			artistImage: artists.images,
+          })
           .from(albums)
+          .leftJoin(artists, eq(artists.id, albums.artistId))
           .where(ilike(albums.name, `%${query}%`))
           .limit(20),
         db

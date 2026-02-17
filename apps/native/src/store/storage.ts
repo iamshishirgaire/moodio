@@ -3,7 +3,7 @@ import { createMMKV } from "react-native-mmkv";
 import { createJSONStorage as createZustandStorage } from "zustand/middleware";
 
 export const storage = createMMKV({
-	id: "your-storage-id-2",
+	id: "your-storage-id-4",
 	encryptionKey: "your-encryption-key",
 });
 
