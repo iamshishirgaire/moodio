@@ -5,4 +5,6 @@ export const Tags = {
   ARTIST: "Artist",
   SEARCH: "Search",
   RECOMMENDATIONS: "Recommendations",
+  ACTIONS: "Actions",
+  LIBRARY: "Library",
 } as const;

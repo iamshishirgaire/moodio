@@ -1,8 +1,9 @@
 import { IconDots } from "@tabler/icons-react-native";
 import { BlurView } from "expo-blur";
 import { useRouter } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
+	Alert,
 	Dimensions,
 	ImageBackground,
 	Platform,
@@ -27,6 +28,9 @@ import { IconButton } from "@/components/ui/icon-button";
 import { theme } from "@/constants/theme";
 import { useAlbumStore } from "@/store/home/album";
 import { useMusicPlayer } from "@/store/player/player";
+import { logUserAction } from "@/utils/actions";
+import { client, orpc, queryClient } from "@/utils/orpc";
+import { useQuery } from "@tanstack/react-query";
 import DeviceAndQueueControl from "./components/device-and-queue-control";
 import PlaybackControls from "./components/playback-control";
 import SeekBar from "./components/seekbar";
@@ -52,6 +56,10 @@ export default function PlayerPage() {
 		initializePlayer,
 		updateLockScreen,
 	} = useMusicPlayer();
+	const [likedTrackIds, setLikedTrackIds] = useState<Record<string, boolean>>(
+		{},
+	);
+	const { data: playlists } = useQuery(orpc.library.getPlaylists.queryOptions());
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <>
 	useEffect(() => {
@@ -133,6 +141,66 @@ export default function PlayerPage() {
 	}
 
 	const releaseYear = album.releaseDate.split("-")[0];
+	const isCurrentTrackLiked = currentTrack ? likedTrackIds[currentTrack.id] === true : false;
+	const addCurrentTrackToPlaylist = (playlistId: string) => {
+		if (!currentTrack?.id) {
+			return;
+		}
+
+		client.library
+			.addTrackToPlaylist({ playlistId, trackId: currentTrack.id })
+			.then(async (result) => {
+				if (result.added) {
+					Alert.alert("Added", "Song added to playlist.");
+				} else {
+					Alert.alert("Already Added", "This song is already in the playlist.");
+				}
+				await queryClient.invalidateQueries();
+			})
+			.catch(() => {
+				Alert.alert("Error", "Failed to add song to playlist.");
+			});
+	};
+
+	const createPlaylistAndAddCurrentTrack = () => {
+		if (!currentTrack?.id) {
+			return;
+		}
+
+		const defaultName = `My Playlist ${new Date().toLocaleDateString()}`;
+		client.library
+			.createPlaylist({ name: defaultName })
+			.then((created) =>
+				client.library.addTrackToPlaylist({
+					playlistId: created.id,
+					trackId: currentTrack.id,
+				}),
+			)
+			.then(async () => {
+				Alert.alert("Playlist Created", "Song added to your new playlist.");
+				await queryClient.invalidateQueries();
+			})
+			.catch(() => {
+				Alert.alert("Error", "Failed to create playlist.");
+			});
+	};
+
+	const openAddToPlaylistMenu = () => {
+		const options =
+			playlists?.map((playlist) => ({
+				text: playlist.name,
+				onPress: () => addCurrentTrackToPlaylist(playlist.id),
+			})) || [];
+
+		Alert.alert("Add to Playlist", "Choose a playlist", [
+			{
+				text: "Create New Playlist",
+				onPress: createPlaylistAndAddCurrentTrack,
+			},
+			...options,
+			{ text: "Cancel", style: "cancel" },
+		]);
+	};
 
 	return (
 		<GestureHandlerRootView style={styles.container}>
@@ -210,13 +278,29 @@ export default function PlayerPage() {
 					<View style={styles.trackInfoContainer}>
 						<TrackInfo
 							artists={currentTrack.artists.map((a) => a.name)}
-							isLiked={false}
+							isLiked={isCurrentTrackLiked}
 							onLike={() => {
-								console.log("Toggle like");
+								if (!currentTrack?.id) {
+									return;
+								}
+								setLikedTrackIds((prev) => {
+									const nextLiked = !prev[currentTrack.id];
+									void logUserAction(
+										currentTrack.id,
+										nextLiked ? "like" : "unlike",
+									);
+									if (nextLiked) {
+										void logUserAction(currentTrack.id, "save_to_library");
+									}
+									return {
+										...prev,
+										[currentTrack.id]: nextLiked,
+									};
+								});
 							}}
-							onMore={() => {
-								console.log("Show more options");
-							}}
+								onMore={() => {
+									openAddToPlaylistMenu();
+								}}
 							title={currentTrack.name}
 						/>
 					</View>

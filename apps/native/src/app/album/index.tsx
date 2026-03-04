@@ -3,7 +3,9 @@ import { IconChevronDown, IconShare2 } from "@tabler/icons-react-native";
 import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
+import { useQuery } from "@tanstack/react-query";
 import {
+	Alert,
 	ImageBackground,
 	Platform,
 	ScrollView,
@@ -24,6 +26,7 @@ import Animated, {
 import { IconButton } from "@/components/ui/icon-button";
 import { theme } from "@/constants/theme";
 import { useAlbumStore } from "@/store/home/album";
+import { client, orpc } from "@/utils/orpc";
 import { handleAppShare } from "@/utils/sharing";
 import MiniPlayer from "../player/components/mini-player";
 import TrackList from "./components/track-list";
@@ -37,6 +40,9 @@ const IMAGE_SIZE = 240;
 export default function AlbumPage() {
 	const album = useAlbumStore((s) => s.current);
 	const scrollY = useSharedValue(0);
+	const { data: libraryData, refetch: refetchLibrary } = useQuery(
+		orpc.library.getLibrary.queryOptions(),
+	);
 
 	const router = useRouter();
 	const scrollHandler = useAnimatedScrollHandler({
@@ -99,6 +105,23 @@ export default function AlbumPage() {
 	}
 
 	const releaseYear = album.releaseDate.split("-")[0];
+	const isSaved =
+		(libraryData?.savedAlbums || []).some((savedAlbum) => savedAlbum.id === album.id);
+
+	const toggleSaveAlbum = async () => {
+		try {
+			if (isSaved) {
+				await client.library.unsaveAlbum({ albumId: album.id });
+				Alert.alert("Removed", "Album removed from your library.");
+			} else {
+				await client.library.saveAlbum({ albumId: album.id });
+				Alert.alert("Saved", "Album added to your library.");
+			}
+			await refetchLibrary();
+		} catch {
+			Alert.alert("Error", "Failed to update your library.");
+		}
+	};
 
 	return (
 		<View style={styles.container}>
@@ -206,10 +229,10 @@ export default function AlbumPage() {
 
 				{/* Secondary Actions */}
 				<View style={styles.secondaryActions}>
-					<TouchableOpacity style={styles.iconButton}>
+					<TouchableOpacity onPress={toggleSaveAlbum} style={styles.iconButton}>
 						<Ionicons
-							color={theme.colors.textSecondary}
-							name="add-circle-outline"
+							color={isSaved ? theme.colors.primary : theme.colors.textSecondary}
+							name={isSaved ? "checkmark-circle" : "add-circle-outline"}
 							size={26}
 						/>
 					</TouchableOpacity>

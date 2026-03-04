@@ -1,4 +1,4 @@
-import { index, pgEnum, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { index, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { user } from "./auth";
 import { tracks } from "./tracks";
 
@@ -14,7 +14,7 @@ export const actionTypeEnum = pgEnum("action_type", [
 export const userActions = pgTable(
 	"user_actions",
 	{
-		id: text("id").primaryKey(),
+		id: uuid().defaultRandom().primaryKey(),
 		userId: text("user_id")
 			.notNull()
 			.references(() => user.id, { onDelete: "cascade" }),

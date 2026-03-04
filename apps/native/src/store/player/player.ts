@@ -1,6 +1,3 @@
-/** biome-ignore-all lint/complexity/noExcessiveCognitiveComplexity: <> */
-/** biome-ignore-all lint/suspicious/useAwait: <> */
-/** biome-ignore-all lint/nursery/noIncrementDecrement: <> */
 
 import type { TTrack } from "@moodio/api/features/album/schema";
 import { type AudioPlayer, setAudioModeAsync } from "expo-audio";
@@ -8,6 +5,7 @@ import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import type { TAlbumWithUserName } from "../home/album";
 import zustandStorage from "../storage";
+import { logUserAction } from "@/utils/actions";
 
 export type TPlayerTrack = TTrack & {
 	albumArtwork: TAlbumWithUserName["images"];
@@ -72,8 +70,8 @@ type MusicPlayerState = {
 
 	// Actions - Track Management
 	setTrack: (track: TPlayerTrack, playImmediately?: boolean) => Promise<void>;
-	playNext: () => Promise<void>;
-	playPrevious: () => Promise<void>;
+	playNext: (reason?: "user" | "auto") => Promise<void>;
+	playPrevious: (reason?: "user" | "auto") => Promise<void>;
 	skipTo: (index: number) => Promise<void>;
 
 	// Actions - Queue Management
@@ -177,6 +175,9 @@ export const useMusicPlayer = create<MusicPlayerState>()(
 						if (player) {
 							player.play();
 							set({ playbackState: "playing" });
+							if (currentTrack?.id) {
+								void logUserAction(currentTrack.id, "play");
+							}
 						} else {
 							// Load new track
 							await get().setTrack(currentTrack, true);
@@ -322,7 +323,7 @@ export const useMusicPlayer = create<MusicPlayerState>()(
 
 							// Auto-play next track when current finishes
 							if (status.didJustFinish) {
-								get().playNext();
+								get().playNext("auto");
 							}
 						});
 
@@ -333,6 +334,9 @@ export const useMusicPlayer = create<MusicPlayerState>()(
 
 						if (playImmediately) {
 							newPlayer.play();
+							if (track.id) {
+								void logUserAction(track.id, "play");
+							}
 						}
 					} catch (error) {
 						console.error("Set track error:", error);
@@ -349,8 +353,11 @@ export const useMusicPlayer = create<MusicPlayerState>()(
 					}
 				},
 
-				playNext: async () => {
+				playNext: async (reason = "user") => {
 					const { queue, queueIndex, repeatMode, currentTrack } = get();
+					if (reason === "user" && currentTrack?.id) {
+						void logUserAction(currentTrack.id, "skip");
+					}
 
 					if (repeatMode === "track" && currentTrack) {
 						// Replay current track
@@ -374,8 +381,11 @@ export const useMusicPlayer = create<MusicPlayerState>()(
 					}
 				},
 
-				playPrevious: async () => {
-					const { queue, queueIndex, position } = get();
+				playPrevious: async (reason = "user") => {
+					const { queue, queueIndex, position, currentTrack } = get();
+					if (reason === "user" && currentTrack?.id) {
+						void logUserAction(currentTrack.id, "skip");
+					}
 
 					// If more than 3 seconds into track, restart it
 					if (position > 3000) {
@@ -392,7 +402,11 @@ export const useMusicPlayer = create<MusicPlayerState>()(
 				},
 
 				skipTo: async (index: number) => {
-					const { queue } = get();
+					const { queue, currentTrack } = get();
+					const targetTrack = queue[index];
+					if (currentTrack?.id && targetTrack?.id && currentTrack.id !== targetTrack.id) {
+						void logUserAction(currentTrack.id, "skip");
+					}
 
 					if (index >= 0 && index < queue.length) {
 						set({ queueIndex: index });

@@ -7,6 +7,7 @@ import { fingerprints } from "./fingerprint";
 import { history } from "./play-history";
 import { playlists, playlistTracks } from "./playlist";
 import { tracks } from "./tracks";
+import { userSavedAlbums } from "./library";
 
 export const fingerprintRelations = relations(fingerprints, ({ one }) => ({
 	track: one(tracks, {
@@ -77,5 +78,13 @@ export const userActionsRelations = relations(userActions, ({ one }) => ({
 	track: one(tracks, {
 		fields: [userActions.trackId],
 		references: [tracks.id],
+	}),
+}));
+
+export const userSavedAlbumsRelations = relations(userSavedAlbums, ({ one }) => ({
+	user: one(user, { fields: [userSavedAlbums.userId], references: [user.id] }),
+	album: one(albums, {
+		fields: [userSavedAlbums.albumId],
+		references: [albums.id],
 	}),
 }));
