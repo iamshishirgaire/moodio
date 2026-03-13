@@ -6,6 +6,7 @@ import { devtools, persist } from "zustand/middleware";
 import type { TAlbumWithUserName } from "../home/album";
 import zustandStorage from "../storage";
 import { logUserAction } from "@/utils/actions";
+import { client } from "@/utils/orpc";
 
 export type TPlayerTrack = TTrack & {
 	albumArtwork: TAlbumWithUserName["images"];
@@ -177,6 +178,7 @@ export const useMusicPlayer = create<MusicPlayerState>()(
 							set({ playbackState: "playing" });
 							if (currentTrack?.id) {
 								void logUserAction(currentTrack.id, "play");
+								void client.history.log({ trackId: currentTrack.id });
 							}
 						} else {
 							// Load new track
@@ -336,6 +338,7 @@ export const useMusicPlayer = create<MusicPlayerState>()(
 							newPlayer.play();
 							if (track.id) {
 								void logUserAction(track.id, "play");
+								void client.history.log({ trackId: track.id });
 							}
 						}
 					} catch (error) {

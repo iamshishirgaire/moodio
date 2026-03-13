@@ -1,9 +1,8 @@
-import { IconDots } from "@tabler/icons-react-native";
+import { IconPlus } from "@tabler/icons-react-native";
 import { BlurView } from "expo-blur";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-	Alert,
 	Dimensions,
 	ImageBackground,
 	Platform,
@@ -29,8 +28,7 @@ import { theme } from "@/constants/theme";
 import { useAlbumStore } from "@/store/home/album";
 import { useMusicPlayer } from "@/store/player/player";
 import { logUserAction } from "@/utils/actions";
-import { client, orpc, queryClient } from "@/utils/orpc";
-import { useQuery } from "@tanstack/react-query";
+import PlaylistPickerSheet from "@/components/playlist-picker-sheet";
 import DeviceAndQueueControl from "./components/device-and-queue-control";
 import PlaybackControls from "./components/playback-control";
 import SeekBar from "./components/seekbar";
@@ -59,7 +57,7 @@ export default function PlayerPage() {
 	const [likedTrackIds, setLikedTrackIds] = useState<Record<string, boolean>>(
 		{},
 	);
-	const { data: playlists } = useQuery(orpc.library.getPlaylists.queryOptions());
+	const [pickerVisible, setPickerVisible] = useState(false);
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <>
 	useEffect(() => {
@@ -142,64 +140,11 @@ export default function PlayerPage() {
 
 	const releaseYear = album.releaseDate.split("-")[0];
 	const isCurrentTrackLiked = currentTrack ? likedTrackIds[currentTrack.id] === true : false;
-	const addCurrentTrackToPlaylist = (playlistId: string) => {
+	const openAddToPlaylistSheet = () => {
 		if (!currentTrack?.id) {
 			return;
 		}
-
-		client.library
-			.addTrackToPlaylist({ playlistId, trackId: currentTrack.id })
-			.then(async (result) => {
-				if (result.added) {
-					Alert.alert("Added", "Song added to playlist.");
-				} else {
-					Alert.alert("Already Added", "This song is already in the playlist.");
-				}
-				await queryClient.invalidateQueries();
-			})
-			.catch(() => {
-				Alert.alert("Error", "Failed to add song to playlist.");
-			});
-	};
-
-	const createPlaylistAndAddCurrentTrack = () => {
-		if (!currentTrack?.id) {
-			return;
-		}
-
-		const defaultName = `My Playlist ${new Date().toLocaleDateString()}`;
-		client.library
-			.createPlaylist({ name: defaultName })
-			.then((created) =>
-				client.library.addTrackToPlaylist({
-					playlistId: created.id,
-					trackId: currentTrack.id,
-				}),
-			)
-			.then(async () => {
-				Alert.alert("Playlist Created", "Song added to your new playlist.");
-				await queryClient.invalidateQueries();
-			})
-			.catch(() => {
-				Alert.alert("Error", "Failed to create playlist.");
-			});
-	};
-
-	const openAddToPlaylistMenu = () => {
-		const options =
-			playlists?.map((playlist) => ({
-				text: playlist.name,
-				onPress: () => addCurrentTrackToPlaylist(playlist.id),
-			})) || [];
-
-		Alert.alert("Add to Playlist", "Choose a playlist", [
-			{
-				text: "Create New Playlist",
-				onPress: createPlaylistAndAddCurrentTrack,
-			},
-			...options,
-			{ text: "Cancel", style: "cancel" },
-		]);
+		setPickerVisible(true);
 	};
 
 	return (
@@ -243,12 +188,8 @@ export default function PlayerPage() {
 							{currentTrack?.name || album.name}
 						</Animated.Text>
 
-						<IconButton
-							onPress={() => {
-								console.log("More");
-							}}
-						>
-							<IconDots />
+						<IconButton onPress={openAddToPlaylistSheet}>
+							<IconPlus size={22} />
 						</IconButton>
 					</View>
 				</AnimatedBlurView>
@@ -298,12 +239,10 @@ export default function PlayerPage() {
 									};
 								});
 							}}
-								onMore={() => {
-									openAddToPlaylistMenu();
-								}}
-							title={currentTrack.name}
-						/>
-					</View>
+								onMore={openAddToPlaylistSheet}
+								title={currentTrack.name}
+							/>
+						</View>
 				) : (
 					<View style={styles.infoContainer}>
 						<Text style={styles.albumName}>{album.name}</Text>
@@ -330,6 +269,11 @@ export default function PlayerPage() {
 				<DeviceAndQueueControl onOpenQueue={openQueue} />
 				<View style={styles.paddingBottom} />
 			</AnimatedScrollView>
+			<PlaylistPickerSheet
+				onClose={() => setPickerVisible(false)}
+				trackId={currentTrack?.id}
+				visible={pickerVisible}
+			/>
 		</GestureHandlerRootView>
 	);
 }

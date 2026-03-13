@@ -1,0 +1,1 @@
+ALTER TABLE "history" ADD COLUMN "last_played_at" timestamp DEFAULT now() NOT NULL;

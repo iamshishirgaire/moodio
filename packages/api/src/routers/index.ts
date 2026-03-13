@@ -6,6 +6,7 @@ import { searchRouter } from "../features/search/router";
 import { recommendationRouter } from "../features/recommendations/router";
 import { actionsRouter } from "../features/actions/router";
 import { libraryRouter } from "../features/library/router";
+import { historyRouter } from "../features/history/router";
 
 export const appRouter = {
   healthCheck: healthRouter,
@@ -15,6 +16,7 @@ export const appRouter = {
   recommendation: recommendationRouter,
   actions: actionsRouter,
   library: libraryRouter,
+  history: historyRouter,
 };
 export type AppRouter = typeof appRouter;
 export type AppRouterClient = RouterClient<typeof appRouter>;

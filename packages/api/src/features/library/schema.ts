@@ -29,6 +29,11 @@ export const unsaveAlbumRequestSchema = z.object({
 	albumId: z.string(),
 });
 
+export const getExploreRequestSchema = z.object({
+	playlistLimit: z.coerce.number().int().min(1).max(50).optional(),
+	albumLimit: z.coerce.number().int().min(1).max(50).optional(),
+});
+
 export type TCreatePlaylistRequest = z.infer<typeof createPlaylistRequestSchema>;
 export type TGetPlaylistRequest = z.infer<typeof getPlaylistRequestSchema>;
 export type TAddTrackToPlaylistRequest = z.infer<
@@ -39,3 +44,4 @@ export type TRemoveTrackFromPlaylistRequest = z.infer<
 >;
 export type TSaveAlbumRequest = z.infer<typeof saveAlbumRequestSchema>;
 export type TUnsaveAlbumRequest = z.infer<typeof unsaveAlbumRequestSchema>;
+export type TGetExploreRequest = z.infer<typeof getExploreRequestSchema>;

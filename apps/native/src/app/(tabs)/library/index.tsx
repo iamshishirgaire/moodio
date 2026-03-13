@@ -9,6 +9,7 @@ import { useAlbumStore } from "@/store/home/album";
 import { client, orpc } from "@/utils/orpc";
 import {
 	IconArrowsSort,
+	IconColumns3,
 	IconDownload,
 	IconLayoutGrid,
 	IconPin,
@@ -43,6 +44,7 @@ type LibraryItem = {
 	isDownloaded?: boolean;
 	sortDate?: string;
 	albumData?: any;
+	artistName?: string | null;
 };
 
 export default function LibraryPage() {
@@ -53,6 +55,10 @@ export default function LibraryPage() {
 
 	const [refreshing, setRefreshing] = useState(false);
 	const [sortBy, setSortBy] = useState<SortOption>("recents");
+	const [activeFilter, setActiveFilter] = useState("All");
+	const [showSearch, setShowSearch] = useState(false);
+	const [query, setQuery] = useState("");
+	const [viewMode, setViewMode] = useState<"list" | "grid">("list");
 	const [showCreateModal, setShowCreateModal] = useState(false);
 	const [newPlaylistName, setNewPlaylistName] = useState("");
 	const [isCreatingPlaylist, setIsCreatingPlaylist] = useState(false);
@@ -84,20 +90,56 @@ export default function LibraryPage() {
 			isDownloaded: false,
 			sortDate: (album.savedAt as unknown as string) || undefined,
 			albumData: album,
+			artistName: album.artistName,
 		}));
 
-		const all = [...playlists, ...albums];
+		let all = [...playlists, ...albums];
 
 		if (sortBy === "alphabetical") {
-			return all.sort((a, b) => a.title.localeCompare(b.title));
+			all = all.sort((a, b) => a.title.localeCompare(b.title));
+		} else {
+			all = all.sort((a, b) => {
+				const first = a.sortDate ? new Date(a.sortDate).getTime() : 0;
+				const second = b.sortDate ? new Date(b.sortDate).getTime() : 0;
+				return second - first;
+			});
 		}
 
-		return all.sort((a, b) => {
-			const first = a.sortDate ? new Date(a.sortDate).getTime() : 0;
-			const second = b.sortDate ? new Date(b.sortDate).getTime() : 0;
-			return second - first;
+		if (activeFilter !== "All") {
+			const filter = activeFilter.toLowerCase();
+			all = all.filter((item) => {
+				if (item.type === "album") {
+					return (item.artistName || "").toLowerCase() === filter;
+				}
+				return item.title.toLowerCase().includes(filter);
+			});
+		}
+
+		if (query.trim().length > 0) {
+			const q = query.trim().toLowerCase();
+			all = all.filter(
+				(item) =>
+					item.title.toLowerCase().includes(q) ||
+					item.subtitle.toLowerCase().includes(q),
+			);
+		}
+
+		return all;
+	}, [data?.playlists, data?.savedAlbums, sortBy, activeFilter, query]);
+
+	const artistFilters = useMemo(() => {
+		const counts = new Map<string, number>();
+		(data?.savedAlbums || []).forEach((album) => {
+			const name = album.artistName?.trim();
+			if (!name) return;
+			counts.set(name, (counts.get(name) ?? 0) + 1);
 		});
-	}, [data?.playlists, data?.savedAlbums, sortBy]);
+		const sorted = [...counts.entries()]
+			.sort((a, b) => b[1] - a[1])
+			.slice(0, 10)
+			.map(([name]) => name);
+		return ["All", ...sorted];
+	}, [data?.savedAlbums]);
 
 	const onRefresh = async () => {
 		setRefreshing(true);
@@ -126,7 +168,10 @@ export default function LibraryPage() {
 	const renderLibraryItem = (item: LibraryItem) => (
 		<Pressable
 			key={`${item.type}-${item.id}`}
-			style={({ pressed }) => [styles.libraryItem, pressed && styles.itemPressed]}
+			style={({ pressed }) => [
+				viewMode === "grid" ? styles.libraryItemGrid : styles.libraryItem,
+				pressed && styles.itemPressed,
+			]}
 			onPress={() => {
 				if (item.type === "album" && item.albumData) {
 					setAlbum(item.albumData);
@@ -137,9 +182,17 @@ export default function LibraryPage() {
 			}}
 		>
 			{item.image ? (
-				<Image source={{ uri: item.image }} style={styles.itemImage} />
+				<Image
+					source={{ uri: item.image }}
+					style={viewMode === "grid" ? styles.itemImageGrid : styles.itemImage}
+				/>
 			) : (
-				<View style={[styles.itemImage, styles.itemImagePlaceholder]}>
+				<View
+					style={[
+						viewMode === "grid" ? styles.itemImageGrid : styles.itemImage,
+						styles.itemImagePlaceholder,
+					]}
+				>
 					<Text style={styles.placeholderText}>♪</Text>
 				</View>
 			)}
@@ -204,7 +257,10 @@ export default function LibraryPage() {
 						<Text style={styles.headerTitle}>Your Library</Text>
 					</View>
 					<View style={styles.headerRight}>
-						<TouchableOpacity style={styles.iconButton}>
+						<TouchableOpacity
+							onPress={() => setShowSearch((prev) => !prev)}
+							style={styles.iconButton}
+						>
 							<IconSearch color={theme.colors.textPrimary} size={24} />
 						</TouchableOpacity>
 						<TouchableOpacity
@@ -216,7 +272,11 @@ export default function LibraryPage() {
 					</View>
 				</View>
 
-				<LibraryFilterRow />
+				<LibraryFilterRow
+					activeFilter={activeFilter}
+					onChange={(value) => setActiveFilter(value)}
+					options={artistFilters}
+				/>
 				<Spacer height={theme.spacing.md} />
 
 				<View style={styles.sortContainer}>
@@ -231,12 +291,33 @@ export default function LibraryPage() {
 							{sortBy === "recents" ? "Recents" : "Alphabetical"}
 						</Text>
 					</TouchableOpacity>
-					<TouchableOpacity style={styles.gridButton}>
-						<IconLayoutGrid color={theme.colors.textPrimary} size={24} />
+					<TouchableOpacity
+						onPress={() =>
+							setViewMode(viewMode === "grid" ? "list" : "grid")
+						}
+						style={styles.gridButton}
+					>
+						{viewMode === "grid" ? (
+							<IconColumns3 color={theme.colors.textPrimary} size={24} />
+						) : (
+							<IconLayoutGrid color={theme.colors.textPrimary} size={24} />
+						)}
 					</TouchableOpacity>
 				</View>
 
 				<Spacer height={theme.spacing.sm} />
+
+				{showSearch && (
+					<View style={styles.searchContainer}>
+						<TextInput
+							onChangeText={setQuery}
+							placeholder="Search your library"
+							placeholderTextColor={theme.colors.textSecondary}
+							style={styles.searchInput}
+							value={query}
+						/>
+					</View>
+				)}
 
 				<View style={styles.libraryList}>
 					{isLoading || isFetching ? (
@@ -245,10 +326,16 @@ export default function LibraryPage() {
 						</View>
 					) : libraryItems.length === 0 ? (
 						<View style={styles.centerState}>
-							<Text style={styles.emptyText}>No saved albums or playlists yet.</Text>
+							<Text style={styles.emptyText}>No items match your filters.</Text>
 						</View>
 					) : (
-						libraryItems.map(renderLibraryItem)
+						viewMode === "grid" ? (
+							<View style={styles.gridList}>
+								{libraryItems.map(renderLibraryItem)}
+							</View>
+						) : (
+							libraryItems.map(renderLibraryItem)
+						)
 					)}
 				</View>
 
@@ -343,14 +430,36 @@ const styles = StyleSheet.create({
 	gridButton: {
 		padding: theme.spacing.xs,
 	},
+	searchContainer: {
+		paddingHorizontal: theme.spacing.md,
+		marginBottom: theme.spacing.sm,
+	},
+	searchInput: {
+		backgroundColor: theme.colors.backgroundSecondary,
+		paddingHorizontal: theme.spacing.sm,
+		paddingVertical: theme.spacing.sm,
+		borderRadius: theme.borderRadius.md,
+		color: theme.colors.textPrimary,
+	},
 	libraryList: {
 		paddingHorizontal: theme.spacing.md,
+	},
+	gridList: {
+		flexDirection: "row",
+		flexWrap: "wrap",
+		justifyContent: "space-between",
 	},
 	libraryItem: {
 		flexDirection: "row",
 		alignItems: "center",
 		paddingVertical: theme.spacing.sm,
 		borderRadius: theme.borderRadius.sm,
+	},
+	libraryItemGrid: {
+		width: "48%",
+		paddingVertical: theme.spacing.sm,
+		borderRadius: theme.borderRadius.sm,
+		marginBottom: theme.spacing.sm,
 	},
 	itemPressed: {
 		backgroundColor: theme.colors.backgroundSecondary,
@@ -359,6 +468,12 @@ const styles = StyleSheet.create({
 		width: 60,
 		height: 60,
 		borderRadius: 4,
+		backgroundColor: theme.colors.backgroundSecondary,
+	},
+	itemImageGrid: {
+		width: "100%",
+		aspectRatio: 1,
+		borderRadius: 8,
 		backgroundColor: theme.colors.backgroundSecondary,
 	},
 	itemImagePlaceholder: {

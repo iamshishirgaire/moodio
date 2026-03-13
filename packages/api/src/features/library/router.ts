@@ -8,6 +8,7 @@ import {
 	removeTrackFromPlaylistRequestSchema,
 	saveAlbumRequestSchema,
 	unsaveAlbumRequestSchema,
+	getExploreRequestSchema,
 } from "./schema";
 
 const getLibrary = protectedProcedure
@@ -96,6 +97,17 @@ const unsaveAlbum = protectedProcedure
 		libraryRepository.unsaveAlbum(context.session.user.id, input),
 	);
 
+const getExplore = protectedProcedure
+	.route({
+		method: "GET",
+		path: "/library/explore",
+		tags: [Tags.LIBRARY],
+	})
+	.input(getExploreRequestSchema)
+	.handler(async ({ context, input }) =>
+		libraryRepository.getExploreSections(context.session.user.id, input),
+	);
+
 export const libraryRouter = {
 	getLibrary,
 	getPlaylists,
@@ -105,4 +117,5 @@ export const libraryRouter = {
 	removeTrackFromPlaylist,
 	saveAlbum,
 	unsaveAlbum,
+	getExplore,
 };

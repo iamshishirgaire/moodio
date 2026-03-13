@@ -3,6 +3,7 @@ import { Stack, useRouter } from "expo-router";
 import { headerStyles } from "@/components/header";
 import { IconButton } from "@/components/ui/icon-button";
 import { theme } from "@/constants/theme";
+import { View } from "react-native";
 
 export default function SearchLayout() {
 	const router = useRouter();
@@ -21,6 +22,11 @@ export default function SearchLayout() {
 						color: theme.colors.textSecondary,
 					},
 					headerRight: () => (
+						<View style={{
+						  flexDirection: "row",
+								alignItems: "center",
+								gap: 8,
+						}}>
 						<IconButton
 							onPress={() => {
 								router.push("/recognize");
@@ -28,6 +34,15 @@ export default function SearchLayout() {
 						>
 							<IconBroadcast size={22} />
 						</IconButton>
+						<IconButton
+							onPress={() => {
+								router.push("/mood-detect");
+							}}
+						>
+							<IconBroadcast size={22} />
+						</IconButton>
+
+						</View>
 					),
 					headerSearchBarOptions: {
 						allowToolbarIntegration: true,

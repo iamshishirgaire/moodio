@@ -1,5 +1,6 @@
 import PlayingIndicator from "@/app/player/components/bars-visualizer";
 import { theme } from "@/constants/theme";
+import { useAlbumStore } from "@/store/home/album";
 import { TPlayerTrack, useMusicPlayer } from "@/store/player/player";
 import { orpc } from "@/utils/orpc";
 import { useQuery } from "@tanstack/react-query";
@@ -13,17 +14,26 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 
 type ElementType<T> = T extends (infer U)[] ? U : never;
 
 export default function ExploreScreen() {
   // Music player store
   const { setQueue, currentTrack, playbackState } = useMusicPlayer();
+  const setAlbum = useAlbumStore((s) => s.setCurrent);
+  const router = useRouter();
 
   // Fetch recommendations
   const { isLoading, data: recommendationsData } = useQuery(
     orpc.recommendation.getAll.queryOptions({
       input: { limit: 10, offset: 0 },
+    }),
+  );
+
+  const { data: exploreData } = useQuery(
+    orpc.library.getExplore.queryOptions({
+      input: { playlistLimit: 10, albumLimit: 10 },
     }),
   );
 
@@ -42,103 +52,41 @@ export default function ExploreScreen() {
     await setQueue(recommendationsData as TPlayerTrack[], index);
   };
 
-  // Mock data for other sections
-  const recentlyPlayed = [
-    {
-      id: "1",
-      title: "Chill Vibes",
-      subtitle: "Playlist • 45 songs",
-      image: "https://picsum.photos/seed/playlist1/200",
-    },
-    {
-      id: "2",
-      title: "Indie Rock Essentials",
-      subtitle: "Playlist • 67 songs",
-      image: "https://picsum.photos/seed/playlist2/200",
-    },
-    {
-      id: "3",
-      title: "Late Night Jazz",
-      subtitle: "Playlist • 32 songs",
-      image: "https://picsum.photos/seed/playlist3/200",
-    },
-    {
-      id: "4",
-      title: "Workout Beats",
-      subtitle: "Playlist • 78 songs",
-      image: "https://picsum.photos/seed/playlist4/200",
-    },
-  ];
+  const { data: historyData } = useQuery(
+    orpc.history.getRecent.queryOptions({
+      input: { limit: 4 },
+    }),
+  );
 
-  const yourPlaylists = [
-    {
-      id: "p1",
-      title: "My Favorites",
-      subtitle: "123 songs",
-      image: "https://picsum.photos/seed/fav1/200",
-    },
-    {
-      id: "p2",
-      title: "Road Trip",
-      subtitle: "45 songs",
-      image: "https://picsum.photos/seed/fav2/200",
-    },
-    {
-      id: "p3",
-      title: "Study Session",
-      subtitle: "89 songs",
-      image: "https://picsum.photos/seed/fav3/200",
-    },
-    {
-      id: "p4",
-      title: "Summer 2024",
-      subtitle: "56 songs",
-      image: "https://picsum.photos/seed/fav4/200",
-    },
-    {
-      id: "p5",
-      title: "Party Mix",
-      subtitle: "112 songs",
-      image: "https://picsum.photos/seed/fav5/200",
-    },
-  ];
+  const yourPlaylists = (exploreData?.playlists || []).map((playlist) => ({
+    id: playlist.id,
+    title: playlist.name,
+    subtitle: `${playlist.trackCount} song${playlist.trackCount === 1 ? "" : "s"}`,
+    image: playlist.thumbnail || "https://via.placeholder.com/200",
+  }));
 
-  const likedAlbums = [
-    {
-      id: "a1",
-      title: "After Hours",
-      artist: "The Weeknd",
-      image: "https://picsum.photos/seed/album1/200",
-    },
-    {
-      id: "a2",
-      title: "folklore",
-      artist: "Taylor Swift",
-      image: "https://picsum.photos/seed/album2/200",
-    },
-    {
-      id: "a3",
-      title: "DAMN.",
-      artist: "Kendrick Lamar",
-      image: "https://picsum.photos/seed/album3/200",
-    },
-    {
-      id: "a4",
-      title: "Blonde",
-      artist: "Frank Ocean",
-      image: "https://picsum.photos/seed/album4/200",
-    },
-  ];
+  const likedAlbums = (exploreData?.albums || []).map((album) => ({
+    id: album.id,
+    title: album.name,
+    artist: album.artistName || "Unknown Artist",
+    image: album.images?.[0]?.url || "https://via.placeholder.com/200",
+    albumData: album,
+  }));
 
 
 
-  const renderQuickAccessItem = ({ item }: { item: any }) => (
+  const renderQuickAccessItem = ({ item, index }: { item: any; index: number }) => (
     <Pressable
       style={({ pressed }) => [
         styles.quickAccessItem,
         pressed && styles.itemPressed,
       ]}
-      onPress={() => console.log("Navigate to:", item.title)}
+      onPress={() => {
+        if (!historyData) {
+          return;
+        }
+        setQueue(historyData as TPlayerTrack[], index);
+      }}
     >
       <Image source={{ uri: item.image }} style={styles.quickAccessImage} />
       <Text style={styles.quickAccessTitle} numberOfLines={1}>
@@ -194,7 +142,16 @@ export default function ExploreScreen() {
         styles.playlistCard,
         pressed && styles.itemPressed,
       ]}
-      onPress={() => console.log("Navigate to:", item.title)}
+      onPress={() => {
+        if (item.albumData) {
+          setAlbum(item.albumData);
+          router.push("/album");
+          return;
+        }
+        if (item.id) {
+          router.push({ pathname: "/playlist/[id]", params: { id: item.id } } as never);
+        }
+      }}
     >
       <Image source={{ uri: item.image }} style={styles.playlistImage} />
       <Text style={styles.playlistTitle} numberOfLines={2}>
@@ -220,7 +177,12 @@ export default function ExploreScreen() {
         {/* Quick Access Grid */}
         <View style={styles.section}>
           <FlatList
-            data={recentlyPlayed}
+            data={(historyData || []).map((track) => ({
+              id: track.id,
+              title: track.name,
+              subtitle: track.artists?.map((a) => a.name).join(", "),
+              image: track.albumArtwork?.[0]?.url || "https://via.placeholder.com/200",
+            }))}
             renderItem={renderQuickAccessItem}
             keyExtractor={(item) => item.id}
             numColumns={2}

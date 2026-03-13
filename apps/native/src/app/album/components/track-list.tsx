@@ -8,8 +8,10 @@ import { IconButton } from "@/components/ui/icon-button";
 import { Text } from "@/components/ui/text";
 import { theme } from "@/constants/theme";
 import { type TPlayerTrack, useMusicPlayer } from "@/store/player/player";
+import PlaylistPickerSheet from "@/components/playlist-picker-sheet";
 import { orpc } from "@/utils/orpc";
 import Explicit from "./explicit";
+import { IconPlus } from "@tabler/icons-react-native";
 
 type TrackListProps = {
 	albumId: string;
@@ -29,6 +31,8 @@ export default function TrackList({ albumId, albumArtwork }: TrackListProps) {
 		useMusicPlayer();
 
 	const [showPlayAll, setShowPlayAll] = useState(true);
+	const [pickerVisible, setPickerVisible] = useState(false);
+	const [selectedTrackId, setSelectedTrackId] = useState<string | null>(null);
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <>
 	useEffect(() => {
@@ -146,14 +150,14 @@ export default function TrackList({ albumId, albumArtwork }: TrackListProps) {
 							{/* More Options */}
 							<IconButton
 								onPress={() => {
-									console.log("");
+									setSelectedTrackId(d.id);
+									setPickerVisible(true);
 								}}
 							>
-								<Icon
+								<IconPlus
 									color={
 										isCurrent ? theme.colors.primary : theme.colors.textTertiary
 									}
-									icon="ellipsis-horizontal"
 									size={18}
 								/>
 							</IconButton>
@@ -161,6 +165,14 @@ export default function TrackList({ albumId, albumArtwork }: TrackListProps) {
 					</Animated.View>
 				);
 			})}
+			<PlaylistPickerSheet
+				onClose={() => {
+					setPickerVisible(false);
+					setSelectedTrackId(null);
+				}}
+				trackId={selectedTrackId}
+				visible={pickerVisible}
+			/>
 		</Animated.View>
 	);
 }

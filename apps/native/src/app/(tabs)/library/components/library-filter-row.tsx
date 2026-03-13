@@ -1,20 +1,15 @@
 import type React from "react";
-import { useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { FilterPill } from "@/components/ui/filter-pill";
 import { theme } from "@/constants/theme";
 
-const filterOptions = [
-  "Playlists",
-  "Podcasts",
-  "Albums",
-  "Artists",
-  "Downloaded",
-];
+type Props = {
+  activeFilter: string;
+  onChange: (value: string) => void;
+  options: string[];
+};
 
-const LibraryFilterRow: React.FC = () => {
-  const [activeFilter, setActiveFilter] = useState("Playlists");
-
+const LibraryFilterRow: React.FC<Props> = ({ activeFilter, onChange, options }) => {
   return (
     <View>
       <ScrollView
@@ -22,11 +17,11 @@ const LibraryFilterRow: React.FC = () => {
         horizontal
         showsHorizontalScrollIndicator={false}
       >
-        {filterOptions.map((filter) => (
+        {options.map((filter) => (
           <FilterPill
             isActive={activeFilter === filter}
             key={filter}
-            onPress={() => setActiveFilter(filter)}
+            onPress={() => onChange(filter)}
             title={filter}
           />
         ))}

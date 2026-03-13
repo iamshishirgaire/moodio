@@ -9,6 +9,7 @@ import * as playlistSchema from "./schema/playlist";
 import * as recommendationsSchema from "./schema/recommendations";
 import * as moodSchema from "./schema/mood";
 import * as librarySchema from "./schema/library";
+import * as historySchema from "./schema/play-history";
 import * as relations from "./schema/relations";
 import * as trackSchema from "./schema/tracks";
 
@@ -27,6 +28,7 @@ export const db = drizzle(pool, {
 		...recommendationsSchema,
 		...moodSchema,
 		...librarySchema,
+		...historySchema,
 		...relations,
 	},
 });

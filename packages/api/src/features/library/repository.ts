@@ -10,6 +10,7 @@ import type {
 	TAddTrackToPlaylistRequest,
 	TCreatePlaylistRequest,
 	TGetPlaylistRequest,
+	TGetExploreRequest,
 	TRemoveTrackFromPlaylistRequest,
 	TSaveAlbumRequest,
 	TUnsaveAlbumRequest,
@@ -52,7 +53,7 @@ export const libraryRepository = {
 		};
 	},
 
-	async getPlaylists(userId: string) {
+	async getPlaylists(userId: string, limit?: number) {
 		return db
 			.select({
 				id: playlists.id,
@@ -68,7 +69,8 @@ export const libraryRepository = {
 			.leftJoin(playlistTracks, eq(playlistTracks.playlistId, playlists.id))
 			.where(eq(playlists.userId, userId))
 			.groupBy(playlists.id)
-			.orderBy(desc(playlists.updatedAt));
+			.orderBy(desc(playlists.updatedAt))
+			.limit(limit ?? 50);
 	},
 
 	async getPlaylistById(userId: string, input: TGetPlaylistRequest) {
@@ -118,6 +120,46 @@ export const libraryRepository = {
 		return {
 			playlist,
 			tracks: playlistWithTracks,
+		};
+	},
+
+	async getExploreSections(userId: string, input: TGetExploreRequest) {
+		const playlistLimit = input.playlistLimit ?? 10;
+		const albumLimit = input.albumLimit ?? 10;
+
+		const [playlistsResult, albumsResult] = await Promise.all([
+			this.getPlaylists(userId, playlistLimit),
+			db
+				.select({
+					savedAt: userSavedAlbums.createdAt,
+					id: albums.id,
+					name: albums.name,
+					albumType: albums.albumType,
+					releaseDate: albums.releaseDate,
+					totalTracks: albums.totalTracks,
+					images: albums.images,
+					externalUrls: albums.externalUrls,
+					genres: albums.genres,
+					popularity: albums.popularity,
+					copyrights: albums.copyrights,
+					createdAt: albums.createdAt,
+					updatedAt: albums.updatedAt,
+					artistId: albums.artistId,
+					singlesArtistId: albums.singlesArtistId,
+					artistName: artists.name,
+					artistImage: artists.images,
+				})
+				.from(userSavedAlbums)
+				.innerJoin(albums, eq(userSavedAlbums.albumId, albums.id))
+				.leftJoin(artists, eq(albums.artistId, artists.id))
+				.where(eq(userSavedAlbums.userId, userId))
+				.orderBy(desc(userSavedAlbums.createdAt))
+				.limit(albumLimit),
+		]);
+
+		return {
+			playlists: playlistsResult,
+			albums: albumsResult,
 		};
 	},
 
